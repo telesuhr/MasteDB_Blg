@@ -3,7 +3,7 @@
 """
 import time
 from functools import wraps
-from typing import Callable, Any, List
+from typing import Callable, Any
 import pandas as pd
 from datetime import datetime, date, timedelta
 import sys
@@ -107,7 +107,7 @@ def convert_date_format(date_obj: Any, target_format: str = '%Y%m%d') -> str:
         raise TypeError(f"Unsupported date type: {type(date_obj)}")
         
 
-def get_business_days(start_date: date, end_date: date) -> List[date]:
+def get_business_days(start_date: date, end_date: date) -> list[date]:
     """
     指定期間の営業日リストを取得
     
@@ -116,7 +116,7 @@ def get_business_days(start_date: date, end_date: date) -> List[date]:
         end_date: 終了日
         
     Returns:
-        List[date]: 営業日のリスト
+        list[date]: 営業日のリスト
     """
     business_days = []
     current_date = start_date
@@ -130,7 +130,7 @@ def get_business_days(start_date: date, end_date: date) -> List[date]:
     return business_days
     
 
-def chunk_list(lst: List[Any], chunk_size: int) -> List[List[Any]]:
+def chunk_list(lst: list[Any], chunk_size: int) -> list[list[Any]]:
     """
     リストを指定サイズのチャンクに分割
     
@@ -139,7 +139,7 @@ def chunk_list(lst: List[Any], chunk_size: int) -> List[List[Any]]:
         chunk_size: チャンクサイズ
         
     Returns:
-        List[List[Any]]: チャンクのリスト
+        list[list[Any]]: チャンクのリスト
     """
     return [lst[i:i + chunk_size] for i in range(0, len(lst), chunk_size)]
     
@@ -215,7 +215,7 @@ def safe_int_conversion(value: Any, default: int = None) -> int:
         return default
         
 
-def create_summary_report(data_counts: Dict[str, int]) -> str:
+def create_summary_report(data_counts: dict[str, int]) -> str:
     """
     データ取得の要約レポートを作成
     

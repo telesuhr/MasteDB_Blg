@@ -14,11 +14,6 @@ sys.path.insert(0, src_dir)
 
 # メインモジュールをインポートして実行
 if __name__ == "__main__":
-    # パスが正しく設定されているかデバッグ
-    print(f"Project root: {project_root}")
-    print(f"Source directory: {src_dir}")
-    print(f"Python path: {sys.path[:3]}")  # 最初の3つのパスを表示
-    
     try:
         from src.main import main
         main()
@@ -26,7 +21,12 @@ if __name__ == "__main__":
         print(f"Import error: {e}")
         print("Trying alternative import method...")
         # 代替方法: srcディレクトリに移動してから実行
+        original_dir = os.getcwd()
         os.chdir(src_dir)
         sys.path.insert(0, os.getcwd())
-        from main import main
-        main()
+        try:
+            from main import main
+            main()
+        finally:
+            # 元のディレクトリに戻る
+            os.chdir(original_dir)
