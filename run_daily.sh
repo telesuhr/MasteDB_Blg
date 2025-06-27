@@ -26,7 +26,7 @@ except Exception as e:
 }
 
 # メイン処理の実行
-python src/main.py --mode daily
+python run.py --mode daily
 
 if [ $? -eq 0 ]; then
     echo "Daily update completed successfully!"

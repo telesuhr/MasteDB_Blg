@@ -55,7 +55,7 @@ except Exception as e:
 
 # メイン処理の実行
 echo "Starting initial data load..."
-python src/main.py --mode initial
+python run.py --mode initial
 
 if [ $? -eq 0 ]; then
     echo "Initial data load completed successfully!"

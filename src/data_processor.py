@@ -5,6 +5,12 @@ import pandas as pd
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, date
 import re
+import sys
+import os
+
+# プロジェクトルートをPythonパスに追加
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 from config.bloomberg_config import BLOOMBERG_TICKERS
 from config.logging_config import logger

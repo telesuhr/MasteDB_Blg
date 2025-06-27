@@ -45,33 +45,50 @@ pip install -r requirements.txt
 
 ### 初回データロード（過去データの一括取得）
 ```bash
-python src/main.py --mode initial
+# プロジェクトルートディレクトリから実行
+python run.py --mode initial
+
+# または実行スクリプトを使用
+# Linux/Mac:
+./run_initial.sh
+# Windows:
+run_initial.bat
 ```
 
 ### 日次更新
 ```bash
-python src/main.py --mode daily
+# プロジェクトルートディレクトリから実行
+python run.py --mode daily
+
+# または実行スクリプトを使用
+# Linux/Mac:
+./run_daily.sh
+# Windows:
+run_daily.bat
 ```
 
 ## プロジェクト構造
 
 ```
 MasterDB_Blg/
-├── src/
+├── src/                     # メインソースコード
 │   ├── main.py              # メインエントリーポイント
 │   ├── bloomberg_api.py     # Bloomberg API接続・データ取得
 │   ├── database.py          # SQL Server接続・データ格納
 │   ├── data_processor.py    # データ変換・処理
 │   └── utils.py             # ユーティリティ関数
-├── config/
+├── config/                  # 設定ファイル
 │   ├── database_config.py   # データベース設定
 │   ├── bloomberg_config.py  # Bloombergティッカー定義
 │   └── logging_config.py    # ロギング設定
-├── sql/
-│   └── create_tables.sql    # テーブル作成SQL
-├── logs/                    # ログファイル
+├── sql/                     # SQL スクリプト
+│   ├── create_tables.sql    # テーブル作成SQL
+│   └── insert_master_data.sql # マスタデータ初期化
 ├── tests/                   # テストコード
-└── docs/                    # ドキュメント
+├── logs/                    # ログファイル
+├── run.py                   # メイン実行スクリプト
+├── run_initial.sh/.bat      # 初回実行スクリプト
+└── run_daily.sh/.bat       # 日次実行スクリプト
 ```
 
 ## ライセンス

@@ -4,8 +4,13 @@ Bloomberg データ取得・SQL Server格納システム
 """
 import argparse
 import sys
+import os
 from datetime import datetime, timedelta
 from typing import Dict, List
+
+# プロジェクトルートをPythonパスに追加
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 from bloomberg_api import BloombergDataFetcher
 from database import DatabaseManager
