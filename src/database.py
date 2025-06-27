@@ -8,6 +8,7 @@ from datetime import datetime
 import time
 import sys
 import os
+import re
 from contextlib import contextmanager
 
 # プロジェクトルートとsrcディレクトリをPythonパスに追加
@@ -137,7 +138,7 @@ class DatabaseManager:
             'indicators': ('IndicatorCode', 'IndicatorName'),
             'regions': ('RegionCode', 'RegionName'),
             'cotr_categories': ('CategoryName', 'Description'),
-            'holding_bands': ('BandRange', 'MinValue')
+            'holding_bands': ('BandRange', 'Description')
         }
         
         if category not in table_mapping:
@@ -162,7 +163,10 @@ class DatabaseManager:
                 
             # 新規挿入
             if name is None:
-                name = code  # 名前が提供されない場合はコードを使用
+                if category == 'holding_bands':
+                    name = f"{code} holding band"  # holding_bandsの場合はより意味のある説明を設定
+                else:
+                    name = code  # 名前が提供されない場合はコードを使用
                 
             insert_fields = [code_field, name_field]
             insert_values = [code, name]
@@ -173,6 +177,16 @@ class DatabaseManager:
                 if not additional_fields or 'CurrencyCode' not in additional_fields:
                     insert_fields.append('CurrencyCode')
                     insert_values.append('USD')
+            
+            # M_HoldingBand テーブルの場合は MinValue と MaxValue を解析して設定
+            elif category == 'holding_bands':
+                min_val, max_val = self._parse_band_range(code)
+                if min_val is not None:
+                    insert_fields.append('MinValue')
+                    insert_values.append(min_val)
+                if max_val is not None:
+                    insert_fields.append('MaxValue')
+                    insert_values.append(max_val)
             
             if additional_fields:
                 insert_fields.extend(additional_fields.keys())
@@ -190,6 +204,35 @@ class DatabaseManager:
             logger.info(f"Created new {category} entry: {code} with ID {new_id}")
             
             return new_id
+    
+    def _parse_band_range(self, band_range: str) -> Tuple[Optional[float], Optional[float]]:
+        """
+        バンド範囲文字列を解析してMinValueとMaxValueを返す
+        
+        Args:
+            band_range: バンド範囲文字列 (例: '5-9%', '40+%', '90+%')
+            
+        Returns:
+            Tuple[Optional[float], Optional[float]]: (MinValue, MaxValue)
+        """
+        # Remove % sign
+        range_str = band_range.replace('%', '')
+        
+        # Pattern: "X-Y" (例: "5-9", "10-19")
+        match = re.match(r'^(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)$', range_str)
+        if match:
+            return float(match.group(1)), float(match.group(2))
+        
+        # Pattern: "X+" (例: "40+", "90+")
+        match = re.match(r'^(\d+(?:\.\d+)?)\+$', range_str)
+        if match:
+            min_val = float(match.group(1))
+            # For "+" ranges, set max to 100 as a reasonable upper bound
+            return min_val, 100.0
+        
+        # If no pattern matches, return None values
+        logger.warning(f"Could not parse band range: {band_range}")
+        return None, None
             
     def upsert_dataframe(self, df: pd.DataFrame, table_name: str, 
                         unique_columns: List[str], retry_count: int = 0) -> int:
