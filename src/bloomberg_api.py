@@ -1,9 +1,16 @@
 """
 Bloomberg APIへの接続とデータ取得モジュール
 """
-import blpapi
+try:
+    import blpapi
+    MOCK_MODE = False
+except ImportError:
+    print("Warning: Real blpapi not available, using mock Bloomberg API for testing")
+    import mock_blpapi as blpapi
+    MOCK_MODE = True
+
 import pandas as pd
-from typing import Dict, List, Optional, Any, Union
+from typing import Optional, Any, Union
 from datetime import datetime, date
 import time
 import sys
@@ -59,9 +66,9 @@ class BloombergDataFetcher:
             self.session.stop()
             logger.info("Disconnected from Bloomberg API")
             
-    def get_historical_data(self, securities: List[str], fields: List[str],
+    def get_historical_data(self, securities: list[str], fields: list[str],
                            start_date: str, end_date: str,
-                           overrides: Optional[Dict[str, Any]] = None) -> pd.DataFrame:
+                           overrides: Optional[dict[str, Any]] = None) -> pd.DataFrame:
         """
         ヒストリカルデータを取得
         
@@ -149,8 +156,8 @@ class BloombergDataFetcher:
             logger.error(f"Error retrieving historical data: {e}")
             return pd.DataFrame()
             
-    def get_reference_data(self, securities: List[str], fields: List[str],
-                          overrides: Optional[Dict[str, Any]] = None) -> pd.DataFrame:
+    def get_reference_data(self, securities: list[str], fields: list[str],
+                          overrides: Optional[dict[str, Any]] = None) -> pd.DataFrame:
         """
         リファレンスデータ（直近値）を取得
         
@@ -221,7 +228,7 @@ class BloombergDataFetcher:
             logger.error(f"Error retrieving reference data: {e}")
             return pd.DataFrame()
             
-    def _process_historical_response(self, msg: blpapi.Message, data_list: List[Dict]):
+    def _process_historical_response(self, msg: blpapi.Message, data_list: list[dict]):
         """
         ヒストリカルデータレスポンスを処理
         
@@ -246,7 +253,11 @@ class BloombergDataFetcher:
             
             # 日付の取得
             if field_data.hasElement("date"):
-                data_point["date"] = field_data.getElementAsDatetime("date").date()
+                date_element = field_data.getElement("date")
+                if date_element.datatype() == blpapi.DataType.DATE:
+                    data_point["date"] = date_element.getValueAsDatetime().date()
+                else:
+                    data_point["date"] = field_data.getElementAsDatetime("date").date()
                 
             # フィールド値の取得
             for j in range(field_data.numElements()):
@@ -265,13 +276,17 @@ class BloombergDataFetcher:
                         elif element.datatype() == blpapi.DataType.INT64:
                             data_point[field_name] = element.getValueAsInt64()
                         elif element.datatype() == blpapi.DataType.DATE:
-                            data_point[field_name] = element.getValueAsDatetime().date()
+                            date_value = element.getValueAsDatetime()
+                            if hasattr(date_value, 'date'):
+                                data_point[field_name] = date_value.date()
+                            else:
+                                data_point[field_name] = date_value
                         else:
                             data_point[field_name] = element.getValueAsString()
                             
             data_list.append(data_point)
             
-    def _process_reference_response(self, msg: blpapi.Message, data_list: List[Dict]):
+    def _process_reference_response(self, msg: blpapi.Message, data_list: list[dict]):
         """
         リファレンスデータレスポンスを処理
         
@@ -308,13 +323,17 @@ class BloombergDataFetcher:
                     elif element.datatype() == blpapi.DataType.INT64:
                         data_point[field_name] = element.getValueAsInt64()
                     elif element.datatype() == blpapi.DataType.DATE:
-                        data_point[field_name] = element.getValueAsDatetime().date()
+                        date_value = element.getValueAsDatetime()
+                        if hasattr(date_value, 'date'):
+                            data_point[field_name] = date_value.date()
+                        else:
+                            data_point[field_name] = date_value
                     else:
                         data_point[field_name] = element.getValueAsString()
                         
             data_list.append(data_point)
             
-    def batch_request(self, securities: List[str], fields: List[str],
+    def batch_request(self, securities: list[str], fields: list[str],
                      start_date: str, end_date: str,
                      batch_size: int = 100,
                      request_type: str = "historical") -> pd.DataFrame:
