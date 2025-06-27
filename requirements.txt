@@ -1,5 +1,5 @@
 # Bloomberg API
-blpapi==3.19.1
+blpapi>=3.19.1
 
 # Database
 pyodbc==5.1.0

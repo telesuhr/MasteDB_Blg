@@ -5,8 +5,9 @@ Bloomberg データ取得・SQL Server格納システム
 import argparse
 import sys
 import os
+import pandas as pd
 from datetime import datetime, timedelta
-from typing import Dict, List
+# from typing import List  # Python 3.9+ では不要
 
 # プロジェクトルートとsrcディレクトリをPythonパスに追加
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -58,7 +59,7 @@ class BloombergSQLIngestor:
         self.db_manager.disconnect()
         
     @measure_execution_time
-    def process_category(self, category_name: str, ticker_info: Dict, 
+    def process_category(self, category_name: str, ticker_info: dict, 
                         start_date: str, end_date: str) -> int:
         """
         カテゴリ別にデータを処理
@@ -142,7 +143,7 @@ class BloombergSQLIngestor:
             logger.error(f"Error processing {category_name}: {e}")
             return 0
             
-    def _process_other_inventory(self, df: pd.DataFrame, ticker_info: Dict) -> pd.DataFrame:
+    def _process_other_inventory(self, df: pd.DataFrame, ticker_info: dict) -> pd.DataFrame:
         """他取引所在庫データを処理"""
         if df.empty:
             return pd.DataFrame()
@@ -170,7 +171,7 @@ class BloombergSQLIngestor:
             
         return pd.DataFrame(processed_data)
         
-    def _process_macro_indicators(self, df: pd.DataFrame, ticker_info: Dict) -> pd.DataFrame:
+    def _process_macro_indicators(self, df: pd.DataFrame, ticker_info: dict) -> pd.DataFrame:
         """マクロ経済指標データを処理"""
         if df.empty:
             return pd.DataFrame()
@@ -224,7 +225,7 @@ class BloombergSQLIngestor:
         else:
             return 'Monthly'
             
-    def _get_unique_columns(self, table_name: str) -> List[str]:
+    def _get_unique_columns(self, table_name: str) -> list[str]:
         """テーブルのユニークキーカラムを取得"""
         unique_columns_mapping = {
             'T_CommodityPrice': ['TradeDate', 'MetalID', 'TenorTypeID', 'SpecificTenorDate'],
