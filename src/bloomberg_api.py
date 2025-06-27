@@ -255,9 +255,17 @@ class BloombergDataFetcher:
             if field_data.hasElement("date"):
                 date_element = field_data.getElement("date")
                 if date_element.datatype() == blpapi.DataType.DATE:
-                    data_point["date"] = date_element.getValueAsDatetime().date()
+                    date_value = date_element.getValueAsDatetime()
+                    if hasattr(date_value, 'date'):
+                        data_point["date"] = date_value.date()
+                    else:
+                        data_point["date"] = date_value
                 else:
-                    data_point["date"] = field_data.getElementAsDatetime("date").date()
+                    date_value = field_data.getElementAsDatetime("date")
+                    if hasattr(date_value, 'date'):
+                        data_point["date"] = date_value.date()
+                    else:
+                        data_point["date"] = date_value
                 
             # フィールド値の取得
             for j in range(field_data.numElements()):
