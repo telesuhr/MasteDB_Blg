@@ -8,9 +8,11 @@ import re
 import sys
 import os
 
-# プロジェクトルートをPythonパスに追加
+# プロジェクトルートとsrcディレクトリをPythonパスに追加
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+src_dir = os.path.join(project_root, 'src')
 sys.path.insert(0, project_root)
+sys.path.insert(0, src_dir)
 
 from config.bloomberg_config import BLOOMBERG_TICKERS
 from config.logging_config import logger

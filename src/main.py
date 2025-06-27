@@ -8,9 +8,11 @@ import os
 from datetime import datetime, timedelta
 from typing import Dict, List
 
-# プロジェクトルートをPythonパスに追加
+# プロジェクトルートとsrcディレクトリをPythonパスに追加
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+src_dir = os.path.join(project_root, 'src')
 sys.path.insert(0, project_root)
+sys.path.insert(0, src_dir)
 
 from bloomberg_api import BloombergDataFetcher
 from database import DatabaseManager

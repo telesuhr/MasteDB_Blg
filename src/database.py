@@ -10,9 +10,11 @@ import sys
 import os
 from contextlib import contextmanager
 
-# プロジェクトルートをPythonパスに追加
+# プロジェクトルートとsrcディレクトリをPythonパスに追加
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+src_dir = os.path.join(project_root, 'src')
 sys.path.insert(0, project_root)
+sys.path.insert(0, src_dir)
 
 from config.database_config import (
     get_connection_string, TABLES, BATCH_SIZE, MAX_RETRIES, RETRY_DELAY
