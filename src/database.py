@@ -223,11 +223,17 @@ class DatabaseManager:
                                                          unique_columns)
                     
                     # バッチデータを処理
-                    for _, row in batch_df.iterrows():
+                    for row_idx, row in batch_df.iterrows():
                         values = [row[col] if pd.notna(row[col]) else None 
                                  for col in batch_df.columns]
-                        cursor.execute(merge_query, values)  # MERGE query only needs values once
-                        processed_count += cursor.rowcount
+                        try:
+                            cursor.execute(merge_query, values)
+                            processed_count += cursor.rowcount
+                        except Exception as row_error:
+                            logger.error(f"Error processing row {row_idx} in table {table_name}: {row_error}")
+                            logger.error(f"Row data: {dict(row)}")
+                            logger.error(f"Values: {values}")
+                            raise
                         
                     conn.commit()
                     logger.debug(f"Processed batch {i//BATCH_SIZE + 1} for table {table_name}")
@@ -262,9 +268,14 @@ class DatabaseManager:
         source_values = ', '.join(['?' for _ in columns])
         source_columns = ', '.join(columns)
         
-        # JOIN条件
-        join_conditions = ' AND '.join([f"target.{col} = source.{col}" 
-                                       for col in unique_columns])
+        # JOIN条件 (NULL値を適切に処理)
+        join_conditions = []
+        for col in unique_columns:
+            # NULL値の比較を適切に処理
+            join_conditions.append(
+                f"(target.{col} = source.{col} OR (target.{col} IS NULL AND source.{col} IS NULL))"
+            )
+        join_conditions = ' AND '.join(join_conditions)
         
         # UPDATE句（LastUpdated以外）
         update_columns = [col for col in columns 

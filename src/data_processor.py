@@ -55,12 +55,27 @@ class DataProcessor:
                 tenor_name = tenor_mapping.get(security, 'Unknown')
                 tenor_type_id = self.db_manager.get_or_create_master_id('tenor_types', tenor_name)
                 
+                # SpecificTenorDateの計算
+                # ジェネリック先物（LP, CU, HG）の場合はNULL、
+                # 特定の満期日がある場合はその日付を使用
+                specific_tenor_date = None
+                maturity_date = row.get('FUT_DLV_DT')
+                
+                # Bloombergから満期日が取得できて、かつジェネリック先物でない場合
+                if (maturity_date is not None and 
+                    not any(prefix in security for prefix in ['LP', 'CU', 'HG']) and
+                    not security.endswith('Index')):
+                    try:
+                        specific_tenor_date = pd.to_datetime(maturity_date).date()
+                    except:
+                        specific_tenor_date = None
+                
                 # 価格データの構築
                 processed_row = {
                     'TradeDate': trade_date,
                     'MetalID': metal_id,
                     'TenorTypeID': tenor_type_id,
-                    'SpecificTenorDate': None,  # ジェネリック先物なのでNULL
+                    'SpecificTenorDate': specific_tenor_date,
                     'SettlementPrice': row.get('PX_LAST'),
                     'OpenPrice': row.get('PX_OPEN'),
                     'HighPrice': row.get('PX_HIGH'),
@@ -68,7 +83,7 @@ class DataProcessor:
                     'LastPrice': row.get('PX_LAST'),
                     'Volume': row.get('PX_VOLUME'),
                     'OpenInterest': row.get('OPEN_INT'),
-                    'MaturityDate': row.get('FUT_DLV_DT')
+                    'MaturityDate': maturity_date
                 }
                 
                 # データ型の変換とクリーニング
