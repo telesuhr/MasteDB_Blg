@@ -151,8 +151,13 @@ class DatabaseManager:
             cursor = conn.cursor()
             
             # 既に存在するかチェック（別セッションで作成された可能性）
-            check_query = f"SELECT {code_field.replace('Name', 'ID').replace('Code', 'ID').replace('Range', 'ID')} " \
-                         f"FROM {table_name} WHERE {code_field} = ?"
+            # Handle special case for COTR categories where ID field is COTRCategoryID
+            if category == 'cotr_categories':
+                id_field = 'COTRCategoryID'
+            else:
+                id_field = code_field.replace('Name', 'ID').replace('Code', 'ID').replace('Range', 'ID')
+            
+            check_query = f"SELECT {id_field} FROM {table_name} WHERE {code_field} = ?"
             cursor.execute(check_query, code)
             result = cursor.fetchone()
             
@@ -193,7 +198,7 @@ class DatabaseManager:
                 insert_values.extend(additional_fields.values())
                 
             insert_query = f"INSERT INTO {table_name} ({', '.join(insert_fields)}) " \
-                          f"OUTPUT INSERTED.{code_field.replace('Name', 'ID').replace('Code', 'ID').replace('Range', 'ID')} " \
+                          f"OUTPUT INSERTED.{id_field} " \
                           f"VALUES ({', '.join(['?'] * len(insert_values))})"
             
             cursor.execute(insert_query, insert_values)

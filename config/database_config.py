@@ -10,7 +10,7 @@ DATABASE_CONFIG: Dict[str, str] = {
     'database': 'JCL',
     'username': 'TKJCZ01',
     'password': 'P@ssw0rdmbkazuresql',
-    'driver': '{ODBC Driver 17 for SQL Server}',
+    'driver': '{ODBC Driver 18 for SQL Server}',
     'timeout': '30'
 }
 
