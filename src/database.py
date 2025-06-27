@@ -167,6 +167,13 @@ class DatabaseManager:
             insert_fields = [code_field, name_field]
             insert_values = [code, name]
             
+            # M_Metal テーブルの場合は CurrencyCode を必須フィールドとして追加
+            if category == 'metals':
+                # additional_fields で CurrencyCode が指定されていない場合はデフォルト値 'USD' を設定
+                if not additional_fields or 'CurrencyCode' not in additional_fields:
+                    insert_fields.append('CurrencyCode')
+                    insert_values.append('USD')
+            
             if additional_fields:
                 insert_fields.extend(additional_fields.keys())
                 insert_values.extend(additional_fields.values())
