@@ -1,0 +1,26 @@
+# Bloomberg API
+blpapi==3.19.1
+
+# Database
+pyodbc==5.1.0
+sqlalchemy==2.0.30
+
+# Data processing
+pandas==2.2.2
+numpy==1.26.4
+
+# Date handling
+python-dateutil==2.9.0
+
+# Logging and utilities
+loguru==0.7.2
+
+# Configuration
+python-dotenv==1.0.1
+
+# Testing
+pytest==8.2.2
+pytest-cov==5.0.0
+
+# Type hints
+typing-extensions==4.12.2
