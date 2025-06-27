@@ -226,7 +226,7 @@ class DatabaseManager:
                     for _, row in batch_df.iterrows():
                         values = [row[col] if pd.notna(row[col]) else None 
                                  for col in batch_df.columns]
-                        cursor.execute(merge_query, values * 2)  # MERGEには値が2回必要
+                        cursor.execute(merge_query, values)  # MERGE query only needs values once
                         processed_count += cursor.rowcount
                         
                     conn.commit()
