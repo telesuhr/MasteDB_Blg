@@ -100,14 +100,15 @@ class BloombergDataFetcher:
             request.set("overrideOption", "OVERRIDE_OPTION_GPA")
             request.set("adjustmentFollowDPDF", True)
             
-            # 全データソースからデータを取得
-            overrides_element = request.getElement("overrides")
-            override_element = overrides_element.appendElement()
-            override_element.setElement("fieldId", "ALL_AVAILABLE_PRICING_SOURCE")
-            override_element.setElement("value", "Y")
+            # 全データソースからデータを取得（一時的にコメントアウト - 無効なオーバーライドのため）
+            # overrides_element = request.getElement("overrides")
+            # override_element = overrides_element.appendElement()
+            # override_element.setElement("fieldId", "ALL_AVAILABLE_PRICING_SOURCE")
+            # override_element.setElement("value", "Y")
             
             # カスタムオーバーライドの適用
             if overrides:
+                overrides_element = request.getElement("overrides")
                 for field_id, value in overrides.items():
                     override_element = overrides_element.appendElement()
                     override_element.setElement("fieldId", field_id)
@@ -128,7 +129,8 @@ class BloombergDataFetcher:
                         logger.error(f"Bloomberg response error: {error}")
                         continue
                         
-                    if msg.messageType() == blpapi.Names.HISTORICAL_DATA_RESPONSE:
+                    # 新しいバージョンでは文字列で指定
+                    if str(msg.messageType()) == 'HistoricalDataResponse':
                         self._process_historical_response(msg, data_list)
                         
                 if event.eventType() == blpapi.Event.RESPONSE:
@@ -199,7 +201,8 @@ class BloombergDataFetcher:
                         logger.error(f"Bloomberg response error: {error}")
                         continue
                         
-                    if msg.messageType() == blpapi.Names.REFERENCE_DATA_RESPONSE:
+                    # 新しいバージョンでは文字列で指定
+                    if str(msg.messageType()) == 'ReferenceDataResponse':
                         self._process_reference_response(msg, data_list)
                         
                 if event.eventType() == blpapi.Event.RESPONSE:
