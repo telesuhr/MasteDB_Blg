@@ -275,7 +275,18 @@ class BloombergSQLIngestor:
         
         for category_name in daily_categories:
             if category_name in BLOOMBERG_TICKERS:
-                ticker_info = BLOOMBERG_TICKERS[category_name]
+                ticker_info = BLOOMBERG_TICKERS[category_name].copy()  # Deep copyを作成
+                
+                # MEST地域を除外（LME在庫の場合）
+                if category_name == 'LME_INVENTORY':
+                    # MESTを含むティッカーを除外
+                    for data_type, tickers in ticker_info['securities'].items():
+                        ticker_info['securities'][data_type] = [
+                            t for t in tickers if '%MEST' not in t
+                        ]
+                    # region_mappingからもMESTを削除
+                    if '%MEST Index' in ticker_info.get('region_mapping', {}):
+                        del ticker_info['region_mapping']['%MEST Index']
                 
                 # 過去3日分のデータを取得（週末対応）
                 end_date = datetime.now().strftime('%Y%m%d')
