@@ -121,12 +121,28 @@ class DataProcessor:
                 report_date = pd.to_datetime(row['date']).date()
                 value = row.get('PX_LAST', 0)
                 
+                # デバッグ: 値が0の場合の確認
+                if value == 0 or pd.isna(value):
+                    logger.warning(f"Zero/NaN value for {security} on {report_date}. Available fields: {list(row.keys())}")
+                    # 他のフィールドを確認
+                    for field in ['LAST_PRICE', 'PX_CLOSE', 'PX_MID', 'PX_BID', 'PX_ASK']:
+                        if field in row and row[field] != 0 and not pd.isna(row[field]):
+                            value = row[field]
+                            logger.info(f"Using {field} instead: {value}")
+                            break
+                
                 # 地域の識別
-                region_code = 'GLOBAL'
+                region_code = 'GLOBAL'  # デフォルト
+                
+                # 地域マッピングをチェック
                 for suffix, region in ticker_info['region_mapping'].items():
-                    if security.endswith(suffix):
+                    if suffix in security and security.endswith(suffix):
                         region_code = region
                         break
+                        
+                # "Index"で終わり、地域指定がない場合はGLOBAL
+                if security.endswith(' Index') and '%' not in security:
+                    region_code = 'GLOBAL'
                         
                 # データタイプの識別
                 data_type = None

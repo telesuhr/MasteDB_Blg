@@ -20,7 +20,7 @@ INITIAL_LOAD_PERIODS = {
 
 # Bloomberg フィールド定義
 PRICE_FIELDS = ['PX_LAST', 'PX_OPEN', 'PX_HIGH', 'PX_LOW', 'PX_VOLUME', 'OPEN_INT', 'FUT_DLV_DT']
-INVENTORY_FIELDS = ['PX_LAST']
+INVENTORY_FIELDS = ['PX_LAST', 'LAST_PRICE', 'CUR_MKT_VALUE']
 INDICATOR_FIELDS = ['PX_LAST']
 STOCK_FIELDS = ['PX_LAST', 'PX_OPEN', 'PX_HIGH', 'PX_LOW', 'PX_VOLUME']
 
@@ -98,7 +98,6 @@ BLOOMBERG_TICKERS = {
         'table': 'T_LMEInventory',
         'metal': 'COPPER',
         'region_mapping': {
-            'Index': 'GLOBAL',
             '%AMER Index': 'AMER',
             '%ASIA Index': 'ASIA',
             '%EURO Index': 'EURO',
