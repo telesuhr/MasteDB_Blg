@@ -70,4 +70,4 @@ def update_inventory_only():
         raise
 
 if __name__ == "__main__":
-    update_inventory_only()
+    update_inventory_only()# Force update
