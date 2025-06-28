@@ -1,5 +1,6 @@
 @echo off
 REM 日次更新実行スクリプト (Windows)
+REM 市場タイミングを考慮し、データ検証を含む
 
 echo Starting Bloomberg data daily update...
 
@@ -15,8 +16,8 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM メイン処理の実行
-python run.py --mode daily
+REM 日次更新の実行
+python run_daily.py %*
 
 if %errorlevel% equ 0 (
     echo Daily update completed successfully!

@@ -1,8 +1,7 @@
 @echo off
-REM 拡張版日次更新実行スクリプト (Windows)
-REM 市場タイミングを考慮し、データ検証を含む
+REM 日次更新実行スクリプト (Windows)
 
-echo Starting Enhanced Bloomberg data daily update...
+echo Starting Bloomberg data daily update...
 
 REM 仮想環境の有効化（存在する場合）
 if exist "venv\Scripts\activate.bat" (
@@ -16,12 +15,12 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM 拡張版日次更新の実行
-python run_enhanced_daily.py %*
+REM メイン処理の実行
+python run.py --mode daily
 
 if %errorlevel% equ 0 (
-    echo Enhanced daily update completed successfully!
+    echo Daily update completed successfully!
 ) else (
-    echo Enhanced daily update failed. Please check logs for details.
+    echo Daily update failed. Please check logs for details.
     exit /b 1
 )
