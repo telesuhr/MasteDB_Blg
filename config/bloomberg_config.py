@@ -113,9 +113,9 @@ BLOOMBERG_TICKERS = {
         'metal': 'COPPER',
         'exchange': 'SHFE',
         'type_mapping': {
-            'SHFCCOPD Index': 'total_stock',
-            'SHFCCOPO Index': 'on_warrant',
-            'SFCDTOTL Index': 'on_warrant'
+            'SHFCCOPD Index': 'on_warrant',  # SHFE delivered (on warrant)
+            'SHFCCOPO Index': 'total_stock',  # SHFE open interest (total)
+            'SFCDTOTL Index': 'total_stock'   # SHFE total
         }
     },
     

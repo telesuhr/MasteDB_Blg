@@ -17,7 +17,7 @@ from config.bloomberg_config import INITIAL_LOAD_PERIODS
 from config.logging_config import logger
 
 def update_inventory_only():
-    """LME在庫データのみを更新"""
+    """全在庫データ（LME、SHFE、CMX）を更新"""
     ingestor = BloombergSQLIngestor()
     
     try:
@@ -28,12 +28,26 @@ def update_inventory_only():
         end_date = datetime.now().strftime('%Y%m%d')
         start_date = (datetime.now() - timedelta(days=365 * INITIAL_LOAD_PERIODS['inventory'])).strftime('%Y%m%d')
         
-        logger.info(f"Updating LME inventory data from {start_date} to {end_date}")
+        logger.info(f"Updating inventory data from {start_date} to {end_date}")
         
-        # LME在庫データのみ処理
+        total_records = 0
+        
+        # LME在庫データ処理
         result = ingestor.process_category('LME_INVENTORY', start_date, end_date)
+        logger.info(f"Updated {result} LME inventory records")
+        total_records += result
         
-        logger.info(f"Successfully updated {result} LME inventory records")
+        # SHFE在庫データ処理
+        result = ingestor.process_category('SHFE_INVENTORY', start_date, end_date)
+        logger.info(f"Updated {result} SHFE inventory records")
+        total_records += result
+        
+        # CMX在庫データ処理
+        result = ingestor.process_category('CMX_INVENTORY', start_date, end_date)
+        logger.info(f"Updated {result} CMX inventory records")
+        total_records += result
+        
+        logger.info(f"Successfully updated {total_records} total inventory records")
         
         # 成功したらクリーンアップ
         ingestor.cleanup()
