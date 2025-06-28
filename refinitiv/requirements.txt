@@ -1,0 +1,32 @@
+# Refinitiv MasterDB Data Ingestion System Dependencies
+
+# Refinitiv EIKON Data API
+eikon>=1.1.16
+
+# PostgreSQL Database
+psycopg2-binary>=2.9.0
+SQLAlchemy>=2.0.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Configuration & Utilities
+python-dotenv>=1.0.0
+pyyaml>=6.0.0
+
+# Date/Time Handling
+pytz>=2023.3
+
+# Logging & Monitoring
+colorlog>=6.7.0
+
+# Development & Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Optional: Data Validation
+pandera>=0.17.0
+
+# Optional: Performance Monitoring
+memory-profiler>=0.61.0

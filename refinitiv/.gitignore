@@ -1,0 +1,85 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment (Refinitiv-specific)
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs (Refinitiv-specific)
+logs/*.log
+*.log
+
+# Configuration (may contain sensitive data)
+config/*_local.py
+config/secrets.py
+.env
+.env.local
+config/api_keys.py
+
+# Database
+*.db
+*.sqlite3
+
+# Data files
+data/
+temp/
+*.csv
+*.xlsx
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Refinitiv specific
+.eikon/
+eikon.cfg
+refinitiv_api_key.txt
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Documentation builds
+docs/_build/
+docs/site/
