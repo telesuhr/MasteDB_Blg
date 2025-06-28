@@ -134,15 +134,24 @@ class DataProcessor:
                 # 地域の識別
                 region_code = 'GLOBAL'  # デフォルト
                 
+                # デバッグ: ティッカーと地域マッピングをログ出力
+                logger.debug(f"Processing security: {security}")
+                logger.debug(f"Available region mappings: {ticker_info['region_mapping']}")
+                
                 # 地域マッピングをチェック
                 for suffix, region in ticker_info['region_mapping'].items():
+                    logger.debug(f"Checking if '{security}' ends with '{suffix}'")
                     if suffix in security and security.endswith(suffix):
                         region_code = region
+                        logger.info(f"Matched region: {security} -> {region_code}")
                         break
                         
                 # "Index"で終わり、地域指定がない場合はGLOBAL
                 if security.endswith(' Index') and '%' not in security:
                     region_code = 'GLOBAL'
+                    logger.debug(f"Set to GLOBAL: {security}")
+                
+                logger.debug(f"Final region_code for {security}: {region_code}")
                         
                 # データタイプの識別
                 data_type = None
