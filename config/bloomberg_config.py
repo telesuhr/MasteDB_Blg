@@ -83,25 +83,25 @@ BLOOMBERG_TICKERS = {
     # LME 在庫データ
     'LME_INVENTORY': {
         'securities': {
-            'total_stock': ['NLSCA Index', 'NLSCA @AMER Index', 'NLSCA @ASIA Index', 
-                           'NLSCA @EURO Index', 'NLSCA @MEST Index'],
-            'on_warrant': ['NLECA Index', 'NLECA @AMER Index', 'NLECA @ASIA Index',
-                          'NLECA @EURO Index', 'NLECA @MEST Index'],
-            'cancelled_warrant': ['NLFCA Index', 'NLFCA @AMER Index', 'NLFCA @ASIA Index',
-                                 'NLFCA @EURO Index', 'NLFCA @MEST Index'],
-            'inflow': ['NLJCA Index', 'NLJCA @AMER Index', 'NLJCA @ASIA Index',
-                      'NLJCA @EURO Index', 'NLJCA @MEST Index'],
-            'outflow': ['NLKCA Index', 'NLKCA @AMER Index', 'NLKCA @ASIA Index',
-                       'NLKCA @EURO Index', 'NLKCA @MEST Index']
+            'total_stock': ['NLSCA Index', 'NLSCA %AMER Index', 'NLSCA %ASIA Index', 
+                           'NLSCA %EURO Index', 'NLSCA %MEST Index'],
+            'on_warrant': ['NLECA Index', 'NLECA %AMER Index', 'NLECA %ASIA Index',
+                          'NLECA %EURO Index', 'NLECA %MEST Index'],
+            'cancelled_warrant': ['NLFCA Index', 'NLFCA %AMER Index', 'NLFCA %ASIA Index',
+                                 'NLFCA %EURO Index', 'NLFCA %MEST Index'],
+            'inflow': ['NLJCA Index', 'NLJCA %AMER Index', 'NLJCA %ASIA Index',
+                      'NLJCA %EURO Index', 'NLJCA %MEST Index'],
+            'outflow': ['NLKCA Index', 'NLKCA %AMER Index', 'NLKCA %ASIA Index',
+                       'NLKCA %EURO Index', 'NLKCA %MEST Index']
         },
         'fields': INVENTORY_FIELDS,
         'table': 'T_LMEInventory',
         'metal': 'COPPER',
         'region_mapping': {
-            '@AMER Index': 'AMER',
-            '@ASIA Index': 'ASIA',
-            '@EURO Index': 'EURO',
-            '@MEST Index': 'MEST'
+            '%AMER Index': 'AMER',
+            '%ASIA Index': 'ASIA',
+            '%EURO Index': 'EURO',
+            '%MEST Index': 'MEST'
         }
     },
     

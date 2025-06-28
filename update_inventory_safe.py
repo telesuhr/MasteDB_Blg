@@ -44,11 +44,11 @@ def update_inventory_only():
                     # MESTを含むティッカーを除外
                     for data_type, tickers in ticker_info['securities'].items():
                         ticker_info['securities'][data_type] = [
-                            t for t in tickers if '@MEST' not in t
+                            t for t in tickers if '%MEST' not in t
                         ]
                     # region_mappingからもMESTを削除
-                    if '@MEST Index' in ticker_info['region_mapping']:
-                        del ticker_info['region_mapping']['@MEST Index']
+                    if '%MEST Index' in ticker_info['region_mapping']:
+                        del ticker_info['region_mapping']['%MEST Index']
                 
                 result = ingestor.process_category(category, ticker_info, start_date, end_date)
                 logger.info(f"Updated {result} {category} records")
