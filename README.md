@@ -104,6 +104,8 @@ MasterDB_Blg/
 │   ├── create_tables.sql          # テーブル作成SQL
 │   └── insert_master_data.sql     # マスタデータ初期化
 ├── docs/                          # ドキュメント
+│   ├── DATABASE_DETAILED_SCHEMA.md  # 詳細データベーススキーマ
+│   └── BLOOMBERG_TICKER_MAPPING.md  # Bloombergティッカーマッピング
 ├── logs/                          # ログファイル
 ├── archive/                       # アーカイブファイル
 │   ├── dev_tools/                 # 開発ツール
@@ -114,6 +116,12 @@ MasterDB_Blg/
 ├── run_initial.sh/.bat            # 初回実行スクリプト
 └── run_daily.sh/.bat             # 日次実行スクリプト
 ```
+
+## 詳細ドキュメント
+
+- **[詳細データベーススキーマ](docs/DATABASE_DETAILED_SCHEMA.md)**: 全テーブル構造、フィールド詳細、インデックス、制約の完全ドキュメント
+- **[Bloombergティッカーマッピング](docs/BLOOMBERG_TICKER_MAPPING.md)**: 各Bloombergティッカーとデータベースフィールドの詳細マッピング
+- **[既存ドキュメント](DATABASE_SCHEMA_DOCUMENTATION.md)**: 基本的なスキーマ概要
 
 ## ライセンス
 
