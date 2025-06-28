@@ -13,7 +13,7 @@ sys.path.insert(0, project_root)
 sys.path.insert(0, src_dir)
 
 from src.main import BloombergSQLIngestor
-from config.bloomberg_config import INITIAL_LOAD_PERIODS
+from config.bloomberg_config import INITIAL_LOAD_PERIODS, BLOOMBERG_TICKERS
 from config.logging_config import logger
 
 def update_inventory_only():
@@ -32,20 +32,17 @@ def update_inventory_only():
         
         total_records = 0
         
-        # LME在庫データ処理
-        result = ingestor.process_category('LME_INVENTORY', start_date, end_date)
-        logger.info(f"Updated {result} LME inventory records")
-        total_records += result
+        # 在庫カテゴリのみ処理
+        inventory_categories = ['LME_INVENTORY', 'SHFE_INVENTORY', 'CMX_INVENTORY']
         
-        # SHFE在庫データ処理
-        result = ingestor.process_category('SHFE_INVENTORY', start_date, end_date)
-        logger.info(f"Updated {result} SHFE inventory records")
-        total_records += result
-        
-        # CMX在庫データ処理
-        result = ingestor.process_category('CMX_INVENTORY', start_date, end_date)
-        logger.info(f"Updated {result} CMX inventory records")
-        total_records += result
+        for category in inventory_categories:
+            try:
+                ticker_info = BLOOMBERG_TICKERS[category]
+                result = ingestor.process_category(category, ticker_info, start_date, end_date)
+                logger.info(f"Updated {result} {category} records")
+                total_records += result
+            except Exception as e:
+                logger.error(f"Failed to process {category}: {e}")
         
         logger.info(f"Successfully updated {total_records} total inventory records")
         
