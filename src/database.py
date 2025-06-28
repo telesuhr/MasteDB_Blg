@@ -361,7 +361,13 @@ class DatabaseManager:
         """
         with self.get_connection() as conn:
             if params:
-                return pd.read_sql(query, conn, params=params)
+                # pyodbcの場合、直接cursorでクエリを実行
+                cursor = conn.cursor()
+                cursor.execute(query, params)
+                columns = [column[0] for column in cursor.description]
+                data = cursor.fetchall()
+                cursor.close()
+                return pd.DataFrame(data, columns=columns)
             else:
                 return pd.read_sql(query, conn)
                 

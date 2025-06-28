@@ -120,19 +120,18 @@ class DataValidationManager:
         WHERE 1=1
         """
         
-        params = {}
+        params = []
         
         # 日付条件の追加
         date_column = 'TradeDate' if 'Price' in table_name else 'ReportDate'
-        query += f" AND {date_column} BETWEEN @start_date AND @end_date"
-        params['start_date'] = start_date
-        params['end_date'] = end_date
+        query += f" AND {date_column} BETWEEN ? AND ?"
+        params.extend([start_date, end_date])
         
         # 追加条件
         if additional_conditions:
             for col, val in additional_conditions.items():
-                query += f" AND {col} = @{col}"
-                params[col] = val
+                query += f" AND {col} = ?"
+                params.append(val)
                 
         return self.db_manager.execute_query(query, params)
         
