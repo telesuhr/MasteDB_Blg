@@ -12,7 +12,7 @@ src_dir = os.path.join(project_root, 'src')
 sys.path.insert(0, project_root)
 sys.path.insert(0, src_dir)
 
-from src.bloomberg_api import BloombergAPI
+from src.bloomberg_api import BloombergDataFetcher
 from config.logging_config import logger
 from datetime import datetime, timedelta
 
@@ -33,7 +33,7 @@ def test_lme_tickers():
         ['NLSCA Index', 'NLSCA ASIA Index', 'NLSCA AMER Index', 'NLSCA EURO Index'],
     ]
     
-    bloomberg = BloombergAPI()
+    bloomberg = BloombergDataFetcher()
     
     try:
         bloomberg.connect()
@@ -57,7 +57,7 @@ def test_lme_tickers():
                 if df.empty:
                     logger.warning(f"パターン {i+1}: データなし")
                 else:
-                    logger.success(f"パターン {i+1}: {len(df)}件のデータ取得成功！")
+                    logger.info(f"パターン {i+1}: {len(df)}件のデータ取得成功！")
                     # ティッカー別のデータ件数を表示
                     ticker_counts = df.groupby('security').size()
                     for ticker, count in ticker_counts.items():
