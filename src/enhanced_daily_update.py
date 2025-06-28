@@ -330,15 +330,27 @@ class EnhancedDailyUpdater:
         # この部分は実際のBloomberg APIからのデータ取得ロジックになります
         # ここでは簡略化しています
         securities = []
-        for data_type, tickers in ticker_info.get('securities', {}).items():
-            if isinstance(tickers, list):
-                securities.extend(tickers)
-            elif isinstance(tickers, dict):
-                for position_type, ticker_list in tickers.items():
-                    securities.extend(ticker_list)
+        
+        # securitiesが辞書形式の場合
+        if isinstance(ticker_info.get('securities'), dict):
+            for data_type, tickers in ticker_info.get('securities', {}).items():
+                if isinstance(tickers, list):
+                    securities.extend(tickers)
+                elif isinstance(tickers, dict):
+                    for position_type, ticker_list in tickers.items():
+                        securities.extend(ticker_list)
+        # securitiesがリスト形式の場合
+        elif isinstance(ticker_info.get('securities'), list):
+            securities = ticker_info.get('securities', [])
+        # securitiesがその他の形式の場合
+        else:
+            securities = ticker_info.get('securities', [])
                     
         if not securities:
+            logger.warning(f"No securities found for {category_name}")
             return pd.DataFrame()
+            
+        logger.debug(f"Fetching data for {len(securities)} securities: {securities[:5]}...")
             
         # データ取得
         df = self.ingestor.bloomberg.get_historical_data(
