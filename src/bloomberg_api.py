@@ -126,9 +126,20 @@ class BloombergDataFetcher:
             
             # レスポンスの処理
             data_list = []
+            max_iterations = 1000  # 無限ループ防止
+            iteration_count = 0
             
             while True:
-                event = self.session.nextEvent(500)
+                iteration_count += 1
+                if iteration_count > max_iterations:
+                    logger.warning(f"Max iterations ({max_iterations}) reached, breaking loop")
+                    break
+                
+                try:
+                    event = self.session.nextEvent(5000)  # タイムアウトを5秒に延長
+                except Exception as e:
+                    logger.error(f"Error getting next event: {e}")
+                    break
                 
                 for msg in event:
                     if msg.hasElement("responseError"):

@@ -133,7 +133,21 @@ class DataValidationManager:
                 query += f" AND {col} = ?"
                 params.append(val)
                 
-        return self.db_manager.execute_query(query, params)
+        try:
+            # デバッグ情報を追加
+            self.logger.debug(f"Executing query for {table_name}")
+            self.logger.debug(f"Query: {query}")
+            self.logger.debug(f"Params: {params}")
+            
+            result = self.db_manager.execute_query(query, params)
+            self.logger.debug(f"Query result shape: {result.shape if hasattr(result, 'shape') else 'N/A'}")
+            
+            return result
+        except Exception as e:
+            self.logger.error(f"Query execution failed for {table_name}: {e}")
+            import traceback
+            self.logger.error(f"Full traceback: {traceback.format_exc()}")
+            return pd.DataFrame()  # 空のDataFrameを返す
         
     def validate_new_data(self, new_data: pd.DataFrame, existing_data: pd.DataFrame,
                          key_columns: list, value_columns: list) -> Dict:

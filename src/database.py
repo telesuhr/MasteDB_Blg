@@ -40,6 +40,8 @@ class DatabaseManager:
             yield conn
         except Exception as e:
             logger.error(f"Database connection error: {e}")
+            import traceback
+            logger.error(f"Full traceback: {traceback.format_exc()}")
             raise
         finally:
             if conn:
@@ -367,9 +369,44 @@ class DatabaseManager:
                 columns = [column[0] for column in cursor.description]
                 data = cursor.fetchall()
                 cursor.close()
+                
+                # 安全性チェック: データと列数の整合性確認
+                if not data:
+                    return pd.DataFrame(columns=columns)
+                
+                # データの形状確認
+                expected_cols = len(columns)
+                actual_cols = len(data[0]) if data else 0
+                
+                if expected_cols != actual_cols:
+                    self.logger.warning(f"Column mismatch in query: expected {expected_cols}, got {actual_cols}")
+                    self.logger.warning(f"Query: {query[:100]}...")
+                    self.logger.warning(f"Expected columns: {columns}")
+                    
+                    # 列数を実際のデータに合わせて調整
+                    if actual_cols < expected_cols:
+                        columns = columns[:actual_cols]
+                        self.logger.warning(f"Adjusted columns to: {columns}")
+                    elif actual_cols > expected_cols:
+                        # データを期待列数に切り詰め
+                        data = [row[:expected_cols] for row in data]
+                        self.logger.warning(f"Truncated data to {expected_cols} columns")
+                
                 return pd.DataFrame(data, columns=columns)
             else:
-                return pd.read_sql(query, conn)
+                # pandasの警告を避けるため、SQLAlchemyエンジンを使用
+                try:
+                    from sqlalchemy import create_engine
+                    # pyodbcの接続文字列をSQLAlchemy形式に変換
+                    sqlalchemy_url = f"mssql+pyodbc:///?odbc_connect={self.connection_string.replace('DRIVER=', 'DRIVER%3D').replace(';', '%3B')}"
+                    engine = create_engine(sqlalchemy_url)
+                    return pd.read_sql(query, engine)
+                except ImportError:
+                    # SQLAlchemyが利用できない場合は従来の方法
+                    import warnings
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings("ignore", message="pandas only supports SQLAlchemy")
+                        return pd.read_sql(query, conn)
                 
     def get_latest_date(self, table_name: str, date_column: str, 
                        where_clause: Optional[str] = None) -> Optional[datetime]:
