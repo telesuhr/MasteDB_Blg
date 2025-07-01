@@ -99,6 +99,7 @@ class DataValidationManager:
     def __init__(self, db_manager):
         self.db_manager = db_manager
         self.validation_history = {}
+        self.logger = logger  # ロガーを追加
         
     def calculate_data_hash(self, data: pd.DataFrame) -> str:
         """データフレームのハッシュ値を計算"""

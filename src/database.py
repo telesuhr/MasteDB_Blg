@@ -66,35 +66,40 @@ class DatabaseManager:
         """マスタデータをメモリにロード"""
         try:
             with self.get_connection() as conn:
-                # M_Metal
-                query = "SELECT MetalID, MetalCode, MetalName FROM M_Metal"
-                metals_df = pd.read_sql(query, conn)
-                self.master_data['metals'] = dict(zip(metals_df['MetalCode'], metals_df['MetalID']))
-                
-                # M_TenorType
-                query = "SELECT TenorTypeID, TenorTypeName FROM M_TenorType"
-                tenor_df = pd.read_sql(query, conn)
-                self.master_data['tenor_types'] = dict(zip(tenor_df['TenorTypeName'], tenor_df['TenorTypeID']))
-                
-                # M_Indicator
-                query = "SELECT IndicatorID, IndicatorCode FROM M_Indicator"
-                indicator_df = pd.read_sql(query, conn)
-                self.master_data['indicators'] = dict(zip(indicator_df['IndicatorCode'], indicator_df['IndicatorID']))
-                
-                # M_Region
-                query = "SELECT RegionID, RegionCode FROM M_Region"
-                region_df = pd.read_sql(query, conn)
-                self.master_data['regions'] = dict(zip(region_df['RegionCode'], region_df['RegionID']))
-                
-                # M_COTRCategory
-                query = "SELECT COTRCategoryID, CategoryName FROM M_COTRCategory"
-                cotr_df = pd.read_sql(query, conn)
-                self.master_data['cotr_categories'] = dict(zip(cotr_df['CategoryName'], cotr_df['COTRCategoryID']))
-                
-                # M_HoldingBand
-                query = "SELECT BandID, BandRange FROM M_HoldingBand"
-                band_df = pd.read_sql(query, conn)
-                self.master_data['holding_bands'] = dict(zip(band_df['BandRange'], band_df['BandID']))
+                # pandas警告を抑制
+                import warnings
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", message="pandas only supports SQLAlchemy")
+                    
+                    # M_Metal
+                    query = "SELECT MetalID, MetalCode, MetalName FROM M_Metal"
+                    metals_df = pd.read_sql(query, conn)
+                    self.master_data['metals'] = dict(zip(metals_df['MetalCode'], metals_df['MetalID']))
+                    
+                    # M_TenorType
+                    query = "SELECT TenorTypeID, TenorTypeName FROM M_TenorType"
+                    tenor_df = pd.read_sql(query, conn)
+                    self.master_data['tenor_types'] = dict(zip(tenor_df['TenorTypeName'], tenor_df['TenorTypeID']))
+                    
+                    # M_Indicator
+                    query = "SELECT IndicatorID, IndicatorCode FROM M_Indicator"
+                    indicator_df = pd.read_sql(query, conn)
+                    self.master_data['indicators'] = dict(zip(indicator_df['IndicatorCode'], indicator_df['IndicatorID']))
+                    
+                    # M_Region
+                    query = "SELECT RegionID, RegionCode FROM M_Region"
+                    region_df = pd.read_sql(query, conn)
+                    self.master_data['regions'] = dict(zip(region_df['RegionCode'], region_df['RegionID']))
+                    
+                    # M_COTRCategory
+                    query = "SELECT COTRCategoryID, CategoryName FROM M_COTRCategory"
+                    cotr_df = pd.read_sql(query, conn)
+                    self.master_data['cotr_categories'] = dict(zip(cotr_df['CategoryName'], cotr_df['COTRCategoryID']))
+                    
+                    # M_HoldingBand
+                    query = "SELECT BandID, BandRange FROM M_HoldingBand"
+                    band_df = pd.read_sql(query, conn)
+                    self.master_data['holding_bands'] = dict(zip(band_df['BandRange'], band_df['BandID']))
                 
                 logger.info("Master data loaded successfully")
                 logger.debug(f"Loaded {len(self.master_data['metals'])} metals, "

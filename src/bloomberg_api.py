@@ -126,7 +126,7 @@ class BloombergDataFetcher:
             
             # レスポンスの処理
             data_list = []
-            max_iterations = 1000  # 無限ループ防止
+            max_iterations = 100  # 反復回数を現実的な値に減少
             iteration_count = 0
             
             while True:
@@ -136,23 +136,40 @@ class BloombergDataFetcher:
                     break
                 
                 try:
-                    event = self.session.nextEvent(5000)  # タイムアウトを5秒に延長
+                    # タイムアウトを20秒に延長し、大量データ処理に対応
+                    event = self.session.nextEvent(20000)
                 except Exception as e:
-                    logger.error(f"Error getting next event: {e}")
-                    break
-                
-                for msg in event:
-                    if msg.hasElement("responseError"):
-                        error = msg.getElement("responseError")
-                        logger.error(f"Bloomberg response error: {error}")
+                    logger.error(f"Error getting next event after {iteration_count} iterations: {e}")
+                    # セッションの健全性をチェック
+                    if not self.session or not self.session.eventHandler():
+                        logger.error("Session appears to be corrupted, breaking loop")
+                        break
+                    # 軽微なタイムアウトの場合は継続
+                    if iteration_count < 3:
+                        logger.warning("Retrying nextEvent...")
+                        time.sleep(1)
                         continue
-                        
-                    # 新しいバージョンでは文字列で指定
-                    if str(msg.messageType()) == 'HistoricalDataResponse':
-                        self._process_historical_response(msg, data_list)
-                        
-                if event.eventType() == blpapi.Event.RESPONSE:
-                    break
+                    else:
+                        break
+                
+                # イベントが正常に取得できた場合の処理
+                if event:
+                    for msg in event:
+                        if msg.hasElement("responseError"):
+                            error = msg.getElement("responseError")
+                            logger.error(f"Bloomberg response error: {error}")
+                            continue
+                            
+                        # 新しいバージョンでは文字列で指定
+                        if str(msg.messageType()) == 'HistoricalDataResponse':
+                            self._process_historical_response(msg, data_list)
+                            
+                    if event.eventType() == blpapi.Event.RESPONSE:
+                        break
+                else:
+                    logger.warning(f"Received null event at iteration {iteration_count}")
+                    if iteration_count > 5:
+                        break
                     
             # DataFrameに変換
             if data_list:
