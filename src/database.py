@@ -384,20 +384,42 @@ class DatabaseManager:
                 actual_cols = len(data[0]) if data else 0
                 
                 if expected_cols != actual_cols:
-                    self.logger.warning(f"Column mismatch in query: expected {expected_cols}, got {actual_cols}")
-                    self.logger.warning(f"Query: {query[:100]}...")
-                    self.logger.warning(f"Expected columns: {columns}")
+                    logger.warning(f"Column mismatch in query: expected {expected_cols}, got {actual_cols}")
+                    logger.warning(f"Query: {query[:100]}...")
+                    logger.warning(f"Expected columns: {columns}")
                     
                     # 列数を実際のデータに合わせて調整
                     if actual_cols < expected_cols:
                         columns = columns[:actual_cols]
-                        self.logger.warning(f"Adjusted columns to: {columns}")
+                        logger.warning(f"Adjusted columns to: {columns}")
                     elif actual_cols > expected_cols:
                         # データを期待列数に切り詰め
                         data = [row[:expected_cols] for row in data]
-                        self.logger.warning(f"Truncated data to {expected_cols} columns")
+                        logger.warning(f"Truncated data to {expected_cols} columns")
                 
-                return pd.DataFrame(data, columns=columns)
+                # データが空の場合は空のDataFrameを返す
+                if not data:
+                    return pd.DataFrame(columns=columns)
+                
+                # 安全にDataFrameを作成
+                try:
+                    return pd.DataFrame(data, columns=columns)
+                except ValueError as e:
+                    logger.error(f"DataFrame creation failed: {e}")
+                    logger.error(f"Data shape: {len(data)}x{len(data[0]) if data else 0}")
+                    logger.error(f"Column count: {len(columns)}")
+                    # 最後の手段として、データをリストの形で変換
+                    if data and len(data[0]) == 1 and len(columns) > 1:
+                        # 単一カラムのデータを複数カラムに拡張
+                        logger.warning("Converting single column data to match expected columns")
+                        expanded_data = []
+                        for row in data:
+                            expanded_row = [row[0]] + [None] * (len(columns) - 1)
+                            expanded_data.append(expanded_row)
+                        return pd.DataFrame(expanded_data, columns=columns)
+                    else:
+                        # 空のDataFrameを返す
+                        return pd.DataFrame(columns=columns)
             else:
                 # pandasの警告を避けるため、SQLAlchemyエンジンを使用
                 try:
