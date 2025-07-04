@@ -207,7 +207,29 @@ class MockSession:
                 
                 for field in fields:
                     if field == "PX_LAST":
-                        data[field] = round(random.uniform(8000, 9000), 2)
+                        # All LME copper prices should be in USD/MT for consistency
+                        if 'LP' in security and 'Comdty' in security:
+                            # LP1-LP12 LME Generic futures in USD/MT (corrected from previous pound-based pricing)
+                            # Generate slight variations from cash price to simulate contango/backwardation
+                            base_price = random.uniform(8000, 9000)
+                            # Add slight forward curve variations for different months
+                            if 'LP1' in security:
+                                data[field] = round(base_price + random.uniform(-50, 50), 2)
+                            elif 'LP2' in security:
+                                data[field] = round(base_price + random.uniform(-30, 70), 2)
+                            elif 'LP3' in security:
+                                data[field] = round(base_price + random.uniform(-10, 90), 2)
+                            else:
+                                # LP4-LP12
+                                month_num = int(security.replace('LP', '').replace(' Comdty', ''))
+                                forward_premium = month_num * random.uniform(5, 15)
+                                data[field] = round(base_price + forward_premium, 2)
+                        elif 'Index' in security:
+                            # Index prices (like LMCADY Index) in USD/MT
+                            data[field] = round(random.uniform(8000, 9000), 2)
+                        else:
+                            # Default copper futures prices in USD/MT
+                            data[field] = round(random.uniform(8000, 9000), 2)
                     else:
                         data[field] = round(random.uniform(100, 1000), 2)
                         

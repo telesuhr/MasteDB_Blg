@@ -55,13 +55,13 @@ BLOOMBERG_TICKERS = {
         'securities': [f'CU{i} Comdty' for i in range(1, 13)],  # CU1-CU12
         'fields': PRICE_FIELDS,
         'table': 'T_CommodityPrice',
-        'metal': 'COPPER',
+        'metal': 'CU_SHFE',
         'exchange': 'SHFE',
         'tenor_mapping': {
-            f'CU{i} Comdty': f'Generic {i}st Future' if i == 1
-            else f'Generic {i}nd Future' if i == 2
-            else f'Generic {i}rd Future' if i == 3
-            else f'Generic {i}th Future' for i in range(1, 13)
+            f'CU{i} Comdty': f'SHFE Generic {i}st Future' if i == 1
+            else f'SHFE Generic {i}nd Future' if i == 2
+            else f'SHFE Generic {i}rd Future' if i == 3
+            else f'SHFE Generic {i}th Future' for i in range(1, 13)
         }
     },
     
@@ -70,13 +70,13 @@ BLOOMBERG_TICKERS = {
         'securities': [f'HG{i} Comdty' for i in range(1, 13)],  # HG1-HG12
         'fields': PRICE_FIELDS,
         'table': 'T_CommodityPrice',
-        'metal': 'COPPER',
+        'metal': 'CU_CMX',
         'exchange': 'CMX',
         'tenor_mapping': {
-            f'HG{i} Comdty': f'Generic {i}st Future' if i == 1
-            else f'Generic {i}nd Future' if i == 2
-            else f'Generic {i}rd Future' if i == 3
-            else f'Generic {i}th Future' for i in range(1, 13)
+            f'HG{i} Comdty': f'COMEX Generic {i}st Future' if i == 1
+            else f'COMEX Generic {i}nd Future' if i == 2
+            else f'COMEX Generic {i}rd Future' if i == 3
+            else f'COMEX Generic {i}th Future' for i in range(1, 13)
         }
     },
     
