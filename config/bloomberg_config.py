@@ -33,7 +33,7 @@ BLOOMBERG_TICKERS = {
             'CAD TT00 Comdty',   # LME銅 トムネクスト
             'LMCADS03 Comdty',   # LME銅 3ヶ月先物価格
             'LMCADS 0003 Comdty', # LME銅 Cash/3mスプレッド
-        ] + [f'LP{i} Comdty' for i in range(1, 13)],  # LP1-LP12 Generic futures
+        ] + [f'LP{i} Comdty' for i in range(1, 37)],  # LP1-LP36 Generic futures
         'fields': PRICE_FIELDS,
         'table': 'T_CommodityPrice',
         'metal': 'COPPER',
@@ -46,7 +46,7 @@ BLOOMBERG_TICKERS = {
             **{f'LP{i} Comdty': f'Generic {i}st Future' if i == 1 
                else f'Generic {i}nd Future' if i == 2
                else f'Generic {i}rd Future' if i == 3
-               else f'Generic {i}th Future' for i in range(1, 13)}
+               else f'Generic {i}th Future' for i in range(1, 37)}
         }
     },
     
