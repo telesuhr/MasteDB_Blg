@@ -27,6 +27,7 @@ class DataProcessor:
     def process_commodity_prices(self, df: pd.DataFrame, ticker_info: Dict) -> pd.DataFrame:
         """
         商品価格データを処理（新テーブル構造対応）
+        Cash、Tom-Next、ジェネリック先物を正しく分類
         
         Args:
             df: Bloombergから取得した生データ
@@ -50,14 +51,35 @@ class DataProcessor:
                 metal_code = ticker_info.get('metal', 'COPPER')
                 metal_id = self.db_manager.get_or_create_master_id('metals', metal_code)
                 
-                # 新テーブル構造：GenericIDとActualContractIDを使用
-                # ジェネリック先物の場合
+                # データタイプとIDの判定
                 generic_id = None
                 actual_contract_id = None
-                data_type = 'Generic'  # デフォルトはジェネリック
+                data_type = None
                 
-                # GenericIDを取得（ジェネリック先物の場合）
-                if any(prefix in security for prefix in ['LP', 'CU', 'HG']):
+                # 1. Cash価格の判定（LMCADY Indexなど）
+                if 'Index' in security and any(cash_code in security for cash_code in ['LMCADY', 'LMCADS']):
+                    data_type = 'Cash'
+                    logger.debug(f"{security} identified as Cash")
+                    
+                # 2. Tom-Next価格の判定（CAD TT00 Comdtyなど）
+                elif 'TT00' in security or 'TN00' in security:
+                    data_type = 'TomNext'
+                    logger.debug(f"{security} identified as TomNext")
+                    
+                # 3. 3M先物の判定（LMCADS03 Comdty）
+                elif 'LMCADS03' in security:
+                    data_type = '3MFutures'
+                    logger.debug(f"{security} identified as 3M Futures")
+                    
+                # 4. スプレッドの判定（LMCADS 0003 Comdty）
+                elif 'LMCADS 0003' in security:
+                    data_type = 'Spread'
+                    logger.debug(f"{security} identified as Spread")
+                    
+                # 5. ジェネリック先物の判定（LP1-LP36, CU1-CU12, HG1-HG12）
+                elif any(prefix in security for prefix in ['LP', 'CU', 'HG']) and re.search(r'\d+', security):
+                    data_type = 'Generic'
+                    
                     # M_GenericFuturesからGenericIDを取得
                     with self.db_manager.get_connection() as conn:
                         cursor = conn.cursor()
@@ -86,10 +108,30 @@ class DataProcessor:
                             generic_id = cursor.fetchone()[0]
                             conn.commit()
                             logger.info(f"Created new generic future: {security} (ID: {generic_id})")
-                else:
-                    # 実際の契約の場合はActualContractIDを使用
+                    
+                # 4. 実際の契約月限（LPN25など）
+                elif re.match(r'^LP[A-Z]\d{2}', security):
                     data_type = 'Actual'
-                    # TODO: 実際の契約処理を実装
+                    # ActualContractIDの取得または作成
+                    with self.db_manager.get_connection() as conn:
+                        cursor = conn.cursor()
+                        cursor.execute("""
+                            SELECT ActualContractID FROM M_ActualContract
+                            WHERE ContractTicker = ?
+                        """, (security,))
+                        result = cursor.fetchone()
+                        if result:
+                            actual_contract_id = result[0]
+                        else:
+                            # 新規実契約の作成（必要に応じて）
+                            logger.warning(f"Actual contract not found: {security}")
+                            # 実際の契約作成ロジックは別途実装が必要
+                            continue
+                            
+                else:
+                    # その他の場合はスキップ
+                    logger.warning(f"Unknown security type: {security}")
+                    continue
                 
                 # 価格データの構築（新テーブル構造）
                 processed_row = {
@@ -111,12 +153,20 @@ class DataProcessor:
                 processed_row = self._clean_numeric_fields(processed_row)
                 processed_data.append(processed_row)
                 
+                logger.debug(f"Processed: {security} -> DataType={data_type}, GenericID={generic_id}, ActualContractID={actual_contract_id}")
+                
             except Exception as e:
                 logger.error(f"Error processing price data for {row.get('security')}: {e}")
                 continue
                 
         result_df = pd.DataFrame(processed_data)
         logger.info(f"Processed {len(result_df)} price records")
+        
+        # データタイプ別の件数を表示
+        if not result_df.empty:
+            type_counts = result_df.groupby('DataType').size()
+            logger.info(f"Data type breakdown: {type_counts.to_dict()}")
+        
         return result_df
         
     def _extract_generic_number(self, ticker: str) -> int:

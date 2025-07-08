@@ -12,7 +12,12 @@
       "Bash(ls:*)",
       "Bash(pip install:*)",
       "Bash(find:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(grep:*)",
+      "Bash(dir:*)",
+      "Bash(tree:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

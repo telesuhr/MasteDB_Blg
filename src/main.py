@@ -228,7 +228,7 @@ class BloombergSQLIngestor:
     def _get_unique_columns(self, table_name: str) -> list[str]:
         """テーブルのユニークキーカラムを取得"""
         unique_columns_mapping = {
-            'T_CommodityPrice': ['TradeDate', 'MetalID', 'TenorTypeID', 'SpecificTenorDate'],
+            'T_CommodityPrice': ['TradeDate', 'GenericID', 'ActualContractID', 'DataType'],
             'T_LMEInventory': ['ReportDate', 'MetalID', 'RegionID'],
             'T_OtherExchangeInventory': ['ReportDate', 'MetalID', 'ExchangeCode'],
             'T_MarketIndicator': ['ReportDate', 'IndicatorID', 'MetalID'],

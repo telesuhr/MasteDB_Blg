@@ -16,8 +16,9 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM 日次更新の実行
-python run_daily.py %*
+REM 日次更新の実行（マッピング更新付き）
+REM python run_daily.py %*
+python src/run_daily_with_mapping.py %*
 
 if %errorlevel% equ 0 (
     echo Daily update completed successfully!
