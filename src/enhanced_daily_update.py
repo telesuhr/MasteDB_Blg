@@ -235,6 +235,20 @@ class EnhancedDailyUpdater:
         """拡張版日次更新の実行"""
         logger.info("Starting enhanced daily update with market timing and validation...")
         
+        # 自動ロールオーバー処理を実行
+        logger.info("=== Executing automatic rollover check ===")
+        try:
+            from auto_rollover_manager import AutoRolloverManager
+            rollover_manager = AutoRolloverManager()
+            rollover_success = rollover_manager.execute_auto_rollover()
+            if rollover_success:
+                logger.info("Automatic rollover completed successfully")
+            else:
+                logger.warning("Automatic rollover encountered issues")
+        except Exception as e:
+            logger.error(f"Automatic rollover failed: {e}")
+            # ロールオーバーエラーは日次更新を停止しない
+        
         # カテゴリーを市場別にグループ化
         market_categories = {
             'LME': ['LME_COPPER_PRICES', 'LME_INVENTORY'],

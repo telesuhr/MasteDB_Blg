@@ -26,7 +26,7 @@ class DataProcessor:
         
     def process_commodity_prices(self, df: pd.DataFrame, ticker_info: Dict) -> pd.DataFrame:
         """
-        商品価格データを処理
+        商品価格データを処理（新テーブル構造対応）
         
         Args:
             df: Bloombergから取得した生データ
@@ -50,40 +50,61 @@ class DataProcessor:
                 metal_code = ticker_info.get('metal', 'COPPER')
                 metal_id = self.db_manager.get_or_create_master_id('metals', metal_code)
                 
-                # テナータイプIDの取得
-                tenor_mapping = ticker_info.get('tenor_mapping', {})
-                tenor_name = tenor_mapping.get(security, 'Unknown')
-                tenor_type_id = self.db_manager.get_or_create_master_id('tenor_types', tenor_name)
+                # 新テーブル構造：GenericIDとActualContractIDを使用
+                # ジェネリック先物の場合
+                generic_id = None
+                actual_contract_id = None
+                data_type = 'Generic'  # デフォルトはジェネリック
                 
-                # SpecificTenorDateの計算
-                # ジェネリック先物（LP, CU, HG）の場合はNULL、
-                # 特定の満期日がある場合はその日付を使用
-                specific_tenor_date = None
-                maturity_date = row.get('FUT_DLV_DT')
+                # GenericIDを取得（ジェネリック先物の場合）
+                if any(prefix in security for prefix in ['LP', 'CU', 'HG']):
+                    # M_GenericFuturesからGenericIDを取得
+                    with self.db_manager.get_connection() as conn:
+                        cursor = conn.cursor()
+                        cursor.execute("""
+                            SELECT GenericID FROM M_GenericFutures 
+                            WHERE GenericTicker = ? AND IsActive = 1
+                        """, (security,))
+                        result = cursor.fetchone()
+                        if result:
+                            generic_id = result[0]
+                        else:
+                            # 新規ジェネリック先物の場合は作成
+                            exchange_code = ticker_info.get('exchange', 'LME')
+                            # LP1 -> 1, LP2 -> 2のようにジェネリック番号を抽出
+                            generic_number = self._extract_generic_number(security)
+                            description = f"{exchange_code} Copper Generic {generic_number} Future"
+                            
+                            cursor.execute("""
+                                INSERT INTO M_GenericFutures (
+                                    GenericTicker, MetalID, ExchangeCode, GenericNumber, 
+                                    Description, IsActive, CreatedDate
+                                ) VALUES (?, ?, ?, ?, ?, 1, ?)
+                            """, (security, metal_id, exchange_code, generic_number, 
+                                  description, datetime.now()))
+                            cursor.execute("SELECT @@IDENTITY")
+                            generic_id = cursor.fetchone()[0]
+                            conn.commit()
+                            logger.info(f"Created new generic future: {security} (ID: {generic_id})")
+                else:
+                    # 実際の契約の場合はActualContractIDを使用
+                    data_type = 'Actual'
+                    # TODO: 実際の契約処理を実装
                 
-                # Bloombergから満期日が取得できて、かつジェネリック先物でない場合
-                if (maturity_date is not None and 
-                    not any(prefix in security for prefix in ['LP', 'CU', 'HG']) and
-                    not security.endswith('Index')):
-                    try:
-                        specific_tenor_date = pd.to_datetime(maturity_date).date()
-                    except:
-                        specific_tenor_date = None
-                
-                # 価格データの構築
+                # 価格データの構築（新テーブル構造）
                 processed_row = {
                     'TradeDate': trade_date,
                     'MetalID': metal_id,
-                    'TenorTypeID': tenor_type_id,
-                    'SpecificTenorDate': specific_tenor_date,
+                    'DataType': data_type,
+                    'GenericID': generic_id,
+                    'ActualContractID': actual_contract_id,
                     'SettlementPrice': row.get('PX_LAST'),
                     'OpenPrice': row.get('PX_OPEN'),
                     'HighPrice': row.get('PX_HIGH'),
                     'LowPrice': row.get('PX_LOW'),
                     'LastPrice': row.get('PX_LAST'),
                     'Volume': row.get('PX_VOLUME'),
-                    'OpenInterest': row.get('OPEN_INT'),
-                    'MaturityDate': maturity_date
+                    'OpenInterest': row.get('OPEN_INT')
                 }
                 
                 # データ型の変換とクリーニング
@@ -97,6 +118,12 @@ class DataProcessor:
         result_df = pd.DataFrame(processed_data)
         logger.info(f"Processed {len(result_df)} price records")
         return result_df
+        
+    def _extract_generic_number(self, ticker: str) -> int:
+        """ティッカーからジェネリック番号を抽出"""
+        # LP1 -> 1, LP12 -> 12, CU1 -> 1, HG1 -> 1
+        match = re.search(r'(\d+)', ticker)
+        return int(match.group(1)) if match else 1
         
     def process_lme_inventory(self, df: pd.DataFrame, ticker_info: Dict) -> pd.DataFrame:
         """

@@ -40,3 +40,13 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# Temporary files with connection strings
+*_with_connection.py
+cleanup_and_reload_*.py
+fix_*.py
+create_historical_mappings.py
+quick_load_*.py
+
+# Windows null file
+nul

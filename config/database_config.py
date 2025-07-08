@@ -3,13 +3,17 @@
 """
 import os
 from typing import Dict
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Azure SQL Database接続情報
 DATABASE_CONFIG: Dict[str, str] = {
-    'server': 'jcz.database.windows.net',
-    'database': 'JCL',
-    'username': 'TKJCZ01',
-    'password': 'P@ssw0rdmbkazuresql',
+    'server': os.getenv('DB_SERVER', 'jcz.database.windows.net'),
+    'database': os.getenv('DB_DATABASE', 'JCL'),
+    'username': os.getenv('DB_USERNAME', 'TKJCZ01'),
+    'password': os.getenv('DB_PASSWORD', ''),
     'driver': '{ODBC Driver 17 for SQL Server}',
     'timeout': '30'
 }
