@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(python:*)",
+      "Bash(venvScriptspython.exe:*)",
+      "Bash(\"./venv/Scripts/python.exe\" debug_data.py)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(sqlcmd:*)",
+      "Bash(set AUTO_EXECUTE=1)",
+      "Bash(ls:*)",
+      "Bash(pip install:*)",
+      "Bash(find:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": []
+  }
+}

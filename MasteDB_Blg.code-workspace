@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../TempBlg"
+		},
+		{
+			"path": "../JupyterCopper"
+		}
+	],
+	"settings": {}
+}
