@@ -50,12 +50,12 @@ BLOOMBERG_TICKERS = {
         }
     },
     
-    # SHFE 銅価格
+    # SHFE 銅価格 (上海先物取引所)
     'SHFE_COPPER_PRICES': {
         'securities': [f'CU{i} Comdty' for i in range(1, 13)],  # CU1-CU12
         'fields': PRICE_FIELDS,
         'table': 'T_CommodityPrice',
-        'metal': 'CU_SHFE',
+        'metal': 'COPPER',
         'exchange': 'SHFE',
         'tenor_mapping': {
             f'CU{i} Comdty': f'SHFE Generic {i}st Future' if i == 1
@@ -65,18 +65,18 @@ BLOOMBERG_TICKERS = {
         }
     },
     
-    # CMX 銅価格
+    # CMX 銅価格 (COMEX)
     'CMX_COPPER_PRICES': {
-        'securities': [f'HG{i} Comdty' for i in range(1, 13)],  # HG1-HG12
+        'securities': [f'HG{i} Comdty' for i in range(1, 27)],  # HG1-HG26 (2年分)
         'fields': PRICE_FIELDS,
         'table': 'T_CommodityPrice',
-        'metal': 'CU_CMX',
-        'exchange': 'CMX',
+        'metal': 'COPPER',
+        'exchange': 'COMEX',
         'tenor_mapping': {
             f'HG{i} Comdty': f'COMEX Generic {i}st Future' if i == 1
             else f'COMEX Generic {i}nd Future' if i == 2
             else f'COMEX Generic {i}rd Future' if i == 3
-            else f'COMEX Generic {i}th Future' for i in range(1, 13)
+            else f'COMEX Generic {i}th Future' for i in range(1, 27)
         }
     },
     
