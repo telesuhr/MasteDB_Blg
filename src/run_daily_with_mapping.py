@@ -8,6 +8,7 @@ from bloomberg_api import BloombergDataFetcher
 from database import DatabaseManager
 from main import BloombergSQLIngestor
 from historical_mapping_updater import HistoricalMappingUpdater
+from fetch_actual_contract_info import ActualContractInfoUpdater
 import logging
 
 # ロギング設定
@@ -32,12 +33,18 @@ def main():
         return 1
         
     try:
-        # 1. まず当日のマッピングを更新
+        # 1. まず実契約の情報を更新（Bloomberg APIから正確なデータを取得）
+        logger.info("=== 実契約情報をBloomberg APIから更新 ===")
+        contract_updater = ActualContractInfoUpdater(bloomberg_fetcher, db_manager)
+        contract_updater.update_contract_info()
+        
+        # 2. 過去3日分のマッピングを更新（週末対応）
         logger.info("=== Generic-Actual契約マッピングを更新 ===")
         mapping_updater = HistoricalMappingUpdater(bloomberg_fetcher, db_manager)
-        mapping_updater.update_historical_mappings(today_str, today_str)
+        three_days_ago = (today - timedelta(days=3)).strftime('%Y-%m-%d')
+        mapping_updater.update_historical_mappings(three_days_ago, today_str)
         
-        # 2. その後、通常の日次データ取得
+        # 3. その後、通常の日次データ取得
         logger.info("=== 日次データ取得を開始 ===")
         ingestor = BloombergSQLIngestor(bloomberg_fetcher, db_manager)
         ingestor.run_daily_update()

@@ -17,7 +17,11 @@
       "Bash(dir:*)",
       "Bash(tree:*)",
       "Bash(mv:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(rg:*)",
+      "Bash(git mv:*)",
+      "Bash(move sqlcheck_actual_contract_data.sql sql)",
+      "Bash(powershell:*)"
     ],
     "deny": []
   }

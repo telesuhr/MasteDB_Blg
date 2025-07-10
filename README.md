@@ -65,25 +65,47 @@ run_initial.bat
 
 ### 日次更新（推奨）
 ```bash
-# 標準的な日次更新（市場タイミング・データ検証あり）
-run_daily.bat
-
-# 検証のみ（データ更新なし）
-run_daily.bat --validate-only
-
-# 強制更新（検証警告を無視）
-run_daily.bat --force
+# 標準的な日次更新（自動でマッピング更新・価格データ取得）
+scripts\daily_operations\run_daily.bat
 
 # Linux/Mac:
-./run_daily.sh
+./scripts/daily_operations/run_daily.sh
 ```
 
-## 日次更新の特徴
+### 期間を指定したデータ取得
+```bash
+# 特定期間のデータを一括取得（全カテゴリ）
+python scripts/data_management/run_with_dates.py 2025-01-01 2025-03-01
 
+# または対話形式
+scripts\data_management\fetch_period_data.bat
+
+# 特定カテゴリのみ取得
+python scripts/data_management/run_with_dates.py 2025-01-01 2025-03-01 --categories LME_INVENTORY INTEREST_RATES
+```
+
+### 契約情報の更新
+```bash
+# Bloomberg APIから実契約の正確な情報を取得
+scripts\data_management\update_contract_info.bat
+
+# 特定の契約のみ更新
+scripts\data_management\update_contract_info.bat LPF25 LPG25 LPH25
+```
+
+## 主な機能と特徴
+
+### 日次更新の特徴
+- **自動マッピング更新**: Bloomberg APIから実契約の正確な情報を自動取得
 - **市場タイミング**: LME（17:00ロンドン時間+1時間）、SHFE（15:00上海時間+2時間）、CMX（13:30NY時間+1時間）
 - **データ検証**: 過去2日分の既存データと新規データを比較
 - **変更率監視**: 10%以上の変更率で警告を出力
 - **自動除外**: 問題のあるティッカー（MEST地域など）を自動除外
+
+### データ更新方式
+- **MERGE文（UPSERT）**: 既存データは更新、新規データは挿入
+- **重複実行安全**: 同じ期間を複数回実行しても問題なし
+- **Bloomberg API優先**: 常に最新のBloombergデータで更新
 
 ## プロジェクト構造
 
@@ -95,26 +117,29 @@ MasterDB_Blg/
 │   ├── bloomberg_api.py           # Bloomberg API接続・データ取得
 │   ├── database.py                # SQL Server接続・データ格納
 │   ├── data_processor.py          # データ変換・処理
+│   ├── historical_mapping_updater.py # Generic-Actual契約マッピング更新
+│   ├── run_daily_with_mapping.py  # マッピング付き日次更新
 │   └── utils.py                   # ユーティリティ関数
 ├── config/                        # 設定ファイル
 │   ├── database_config.py         # データベース設定
 │   ├── bloomberg_config.py        # Bloombergティッカー定義
 │   └── logging_config.py          # ロギング設定
 ├── sql/                           # SQL スクリプト
+│   ├── checks/                    # データ確認用SQL
+│   ├── fixes/                     # データ修正用SQL
+│   ├── views/                     # ビュー作成・更新SQL
 │   ├── create_tables.sql          # テーブル作成SQL
 │   └── insert_master_data.sql     # マスタデータ初期化
+├── scripts/                       # 実行スクリプト
+│   ├── daily_operations/          # 日次実行用
+│   ├── data_management/           # データ管理・一括取得
+│   ├── data_loaders/              # 各種データローダー
+│   └── testing/                   # テスト・検証用
 ├── docs/                          # ドキュメント
 │   ├── DATABASE_DETAILED_SCHEMA.md  # 詳細データベーススキーマ
 │   └── BLOOMBERG_TICKER_MAPPING.md  # Bloombergティッカーマッピング
 ├── logs/                          # ログファイル
-├── archive/                       # アーカイブファイル
-│   ├── dev_tools/                 # 開発ツール
-│   ├── old_scripts/               # 古いスクリプト
-│   └── testing/                   # テストファイル
-├── backup/                        # レガシーファイルバックアップ
-├── run_daily.py                   # メイン日次実行スクリプト
-├── run_initial.sh/.bat            # 初回実行スクリプト
-└── run_daily.sh/.bat             # 日次実行スクリプト
+└── CLAUDE.md                      # プロジェクト指示書
 ```
 
 ## 詳細ドキュメント

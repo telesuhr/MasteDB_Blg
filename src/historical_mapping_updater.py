@@ -182,12 +182,35 @@ class HistoricalMappingUpdater:
             if existing:
                 return existing[0]
                 
-            # 新規作成
-            contract_date = bloomberg_data.get('FUT_CONTRACT_DT')
+            # 新規契約の場合、Bloomberg APIから正確な情報を取得
+            logger.info(f"新しい契約を発見: {contract_ticker}。Bloomberg APIから詳細情報を取得します。")
+            
+            # 実契約の詳細情報を取得するためのフィールド
+            actual_fields = [
+                'LAST_TRADEABLE_DT',     # 最終取引日
+                'FUT_DLV_DT_LAST',       # 最終受渡日
+                'FUT_CONTRACT_DT',       # 契約月
+                'FUT_CONT_SIZE',         # 契約サイズ
+                'FUT_TICK_SIZE',         # ティックサイズ
+                'NAME',                  # 契約名
+                'EXCH_CODE'             # 取引所コード
+            ]
+            
+            # 実契約のリファレンスデータを取得
+            ref_data = self.bloomberg.get_reference_data([contract_ticker], actual_fields)
+            
+            if ref_data.empty:
+                logger.error(f"Bloomberg APIから{contract_ticker}の情報を取得できませんでした")
+                return None
+                
+            actual_data = ref_data.iloc[0]
+            
+            # 契約月の解析
             contract_month = None
             contract_year = None
             contract_month_code = None
             
+            contract_date = actual_data.get('FUT_CONTRACT_DT')
             if pd.notna(contract_date):
                 try:
                     # 日付の処理
@@ -206,14 +229,20 @@ class HistoricalMappingUpdater:
                     logger.warning(f"契約月解析エラー: {e}")
                     
             # 最終取引日の処理
-            last_tradeable = bloomberg_data.get('LAST_TRADEABLE_DT')
-            if pd.notna(last_tradeable) and hasattr(last_tradeable, 'date'):
-                last_tradeable = last_tradeable.date()
-                
+            last_tradeable = actual_data.get('LAST_TRADEABLE_DT')
+            if pd.notna(last_tradeable):
+                if hasattr(last_tradeable, 'date'):
+                    last_tradeable = last_tradeable.date()
+                else:
+                    last_tradeable = pd.to_datetime(last_tradeable).date()
+                    
             # 最終受渡日の処理
-            delivery_date = bloomberg_data.get('FUT_DLV_DT_LAST')
-            if pd.notna(delivery_date) and hasattr(delivery_date, 'date'):
-                delivery_date = delivery_date.date()
+            delivery_date = actual_data.get('FUT_DLV_DT_LAST')
+            if pd.notna(delivery_date):
+                if hasattr(delivery_date, 'date'):
+                    delivery_date = delivery_date.date()
+                else:
+                    delivery_date = pd.to_datetime(delivery_date).date()
                     
             # 挿入
             cursor.execute("""
@@ -231,15 +260,19 @@ class HistoricalMappingUpdater:
                 contract_month_code,
                 last_tradeable,
                 delivery_date,
-                float(bloomberg_data.get('FUT_CONT_SIZE')) if pd.notna(bloomberg_data.get('FUT_CONT_SIZE')) else None,
-                float(bloomberg_data.get('FUT_TICK_SIZE')) if pd.notna(bloomberg_data.get('FUT_TICK_SIZE')) else None
+                float(actual_data.get('FUT_CONT_SIZE')) if pd.notna(actual_data.get('FUT_CONT_SIZE')) else None,
+                float(actual_data.get('FUT_TICK_SIZE')) if pd.notna(actual_data.get('FUT_TICK_SIZE')) else None
             ))
             
             cursor.execute("SELECT @@IDENTITY")
             actual_contract_id = cursor.fetchone()[0]
             conn.commit()
             
-            logger.info(f"新規実契約作成: {contract_ticker} (ID: {actual_contract_id})")
+            logger.info(f"新規実契約作成完了: {contract_ticker} (ID: {actual_contract_id})")
+            logger.info(f"  LastTradeableDate: {last_tradeable}")
+            logger.info(f"  DeliveryDate: {delivery_date}")
+            logger.info(f"  ContractMonth: {contract_month}/{contract_year}")
+            
             return actual_contract_id
             
     def _update_mapping(self, trade_date, generic_id: int,
