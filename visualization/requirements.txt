@@ -1,0 +1,28 @@
+# 可視化システム用依存関係
+
+# 基本ライブラリ
+pandas>=1.5.0
+numpy>=1.21.0
+matplotlib>=3.6.0
+seaborn>=0.12.0
+
+# インタラクティブ可視化
+plotly>=5.15.0
+jupyter>=1.0.0
+jupyterlab>=3.6.0
+ipywidgets>=8.0.0
+
+# データベース接続
+pyodbc>=4.0.39
+
+# 機械学習・統計
+scikit-learn>=1.3.0
+scipy>=1.9.0
+
+# その他のユーティリティ
+python-dateutil>=2.8.0
+openpyxl>=3.1.0
+
+# Jupyter拡張機能
+nbformat>=5.7.0
+ipykernel>=6.19.0

@@ -55,6 +55,32 @@ TABLES = {
     'holding_band': 'M_HoldingBand'
 }
 
+# テーブルマッピング（テーブル名 → プロセッサメソッド名）
+TABLE_MAPPINGS = {
+    'T_CommodityPrice': 'process_commodity_prices',
+    'T_CommodityPrice_V2': 'process_commodity_prices',
+    'T_LMEInventory': 'process_lme_inventory',
+    'T_OtherExchangeInventory': 'process_other_inventory',
+    'T_MarketIndicator': 'process_market_indicators',
+    'T_MacroEconomicIndicator': 'process_macro_indicators',
+    'T_COTR': 'process_cotr_data',
+    'T_BandingReport': 'process_banding_data',
+    'T_CompanyStockPrice': 'process_company_prices'
+}
+
+# テーブルごとのユニークキー定義
+TABLE_UNIQUE_KEYS = {
+    'T_CommodityPrice': ['TradeDate', 'MetalID', 'DataType', 'GenericID', 'ActualContractID'],
+    'T_CommodityPrice_V2': ['TradeDate', 'DataType', 'GenericID', 'ActualContractID'],
+    'T_LMEInventory': ['TradeDate', 'MetalID', 'RegionID'],
+    'T_OtherExchangeInventory': ['TradeDate', 'MetalID', 'Exchange'],
+    'T_MarketIndicator': ['TradeDate', 'IndicatorID'],
+    'T_MacroEconomicIndicator': ['TradeDate', 'IndicatorID'],
+    'T_COTR': ['TradeDate', 'MetalID', 'COTRCategoryID'],
+    'T_BandingReport': ['TradeDate', 'MetalID', 'HoldingBandID'],
+    'T_CompanyStockPrice': ['TradeDate', 'CompanyTicker']
+}
+
 # バッチサイズ設定
 BATCH_SIZE = 1000
 

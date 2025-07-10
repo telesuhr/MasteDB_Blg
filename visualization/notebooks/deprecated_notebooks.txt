@@ -1,0 +1,13 @@
+# 廃止予定ファイル
+
+以下のファイルは古い設定を使用しており、データベース接続エラーが発生します。
+代わりに修正版（_fixedなし）を使用してください。
+
+## 削除対象ファイル
+- 01_copper_price_analysis_fixed.ipynb → 01_copper_price_analysis.ipynb に統合
+- 02_inventory_analysis.ipynb → 要修正
+- 02_inventory_analysis_fixed.ipynb → 02_inventory_analysis.ipynb に統合予定
+- 03_tenor_spread_analysis.ipynb → 要修正 
+- 03_tenor_spread_analysis_fixed.ipynb → 03_tenor_spread_analysis.ipynb に統合予定
+- 04_comprehensive_dashboard.ipynb → 要修正
+- 04_comprehensive_dashboard_fixed.ipynb → 04_comprehensive_dashboard.ipynb に統合予定
