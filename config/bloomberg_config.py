@@ -9,13 +9,13 @@ BLOOMBERG_PORT = 8194
 
 # データ取得期間設定
 INITIAL_LOAD_PERIODS = {
-    'prices': 5,  # 年
-    'inventory': 5,  # 年
-    'indicators': 5,  # 年
-    'macro': 10,  # 年
-    'cotr': 5,  # 年
-    'banding': 3,  # 年
-    'stocks': 5  # 年
+    'prices': 20,  # 年
+    'inventory': 20,  # 年
+    'indicators': 20,  # 年
+    'macro': 20,  # 年
+    'cotr': 20,  # 年
+    'banding': 20,  # 年
+    'stocks': 20  # 年
 }
 
 # Bloomberg フィールド定義
