@@ -47,8 +47,17 @@ class DataProcessor:
                 security = row['security']
                 trade_date = pd.to_datetime(row['date']).date()
                 
-                # メタルIDの取得
-                metal_code = ticker_info.get('metal', 'COPPER')
+                # メタルIDの取得（取引所に応じて適切なメタルコードを使用）
+                base_metal_code = ticker_info.get('metal', 'COPPER')
+                
+                # 取引所別のメタルコードを決定
+                if security.startswith('CU') and not security.startswith('CU_'):
+                    metal_code = 'CU_SHFE'  # SHFE
+                elif security.startswith('HG'):
+                    metal_code = 'CU_CMX'   # COMEX
+                else:
+                    metal_code = base_metal_code  # LME (COPPER)
+                
                 metal_id = self.db_manager.get_or_create_master_id('metals', metal_code)
                 
                 # データタイプとIDの判定
@@ -76,9 +85,19 @@ class DataProcessor:
                     data_type = 'Spread'
                     logger.debug(f"{security} identified as Spread")
                     
-                # 5. ジェネリック先物の判定（LP1-LP36, CU1-CU12, HG1-HG12）
+                # 5. ジェネリック先物の判定（LP1-LP36, CU1-CU12, HG1-HG26）
                 elif any(prefix in security for prefix in ['LP', 'CU', 'HG']) and re.search(r'\d+', security):
                     data_type = 'Generic'
+                    
+                    # 取引所コードを決定
+                    if security.startswith('LP'):
+                        exchange_code = 'LME'
+                    elif security.startswith('CU'):
+                        exchange_code = 'SHFE'
+                    elif security.startswith('HG'):
+                        exchange_code = 'COMEX'
+                    else:
+                        exchange_code = ticker_info.get('exchange', 'LME')
                     
                     # M_GenericFuturesからGenericIDを取得
                     with self.db_manager.get_connection() as conn:
@@ -90,28 +109,44 @@ class DataProcessor:
                         result = cursor.fetchone()
                         if result:
                             generic_id = result[0]
+                            logger.debug(f"Found existing generic future: {security} (ID: {generic_id})")
                         else:
                             # 新規ジェネリック先物の場合は作成
-                            exchange_code = ticker_info.get('exchange', 'LME')
-                            # LP1 -> 1, LP2 -> 2のようにジェネリック番号を抽出
+                            # LP1 -> 1, CU1 -> 1, HG1 -> 1のようにジェネリック番号を抽出
                             generic_number = self._extract_generic_number(security)
                             description = f"{exchange_code} Copper Generic {generic_number} Future"
+                            
+                            # この時点でmetal_idは既に正しい値（取引所別）になっている
+                            exchange_metal_id = metal_id
                             
                             cursor.execute("""
                                 INSERT INTO M_GenericFutures (
                                     GenericTicker, MetalID, ExchangeCode, GenericNumber, 
                                     Description, IsActive, CreatedDate
                                 ) VALUES (?, ?, ?, ?, ?, 1, ?)
-                            """, (security, metal_id, exchange_code, generic_number, 
+                            """, (security, exchange_metal_id, exchange_code, generic_number, 
                                   description, datetime.now()))
                             cursor.execute("SELECT @@IDENTITY")
                             generic_id = cursor.fetchone()[0]
                             conn.commit()
-                            logger.info(f"Created new generic future: {security} (ID: {generic_id})")
+                            logger.info(f"Created new generic future: {security} (ID: {generic_id}, Exchange: {exchange_code})")
                     
-                # 4. 実際の契約月限（LPN25など）
-                elif re.match(r'^LP[A-Z]\d{2}', security):
+                # 6. 実際の契約月限（LPN25, HGN5, CUA5など）
+                elif (re.match(r'^LP[A-Z]\d{2}', security) or 
+                      re.match(r'^HG[A-Z]\d{1,2}', security) or 
+                      re.match(r'^CU[A-Z]\d{1,2}', security)):
                     data_type = 'Actual'
+                    
+                    # 取引所コードを決定
+                    if security.startswith('LP'):
+                        exchange_code = 'LME'
+                    elif security.startswith('CU'):
+                        exchange_code = 'SHFE'
+                    elif security.startswith('HG'):
+                        exchange_code = 'COMEX'
+                    else:
+                        exchange_code = ticker_info.get('exchange', 'LME')
+                    
                     # ActualContractIDの取得または作成
                     with self.db_manager.get_connection() as conn:
                         cursor = conn.cursor()
@@ -123,10 +158,19 @@ class DataProcessor:
                         if result:
                             actual_contract_id = result[0]
                         else:
-                            # 新規実契約の作成（必要に応じて）
-                            logger.warning(f"Actual contract not found: {security}")
-                            # 実際の契約作成ロジックは別途実装が必要
-                            continue
+                            # 新規実契約の作成
+                            # この時点でmetal_idは既に正しい値（取引所別）になっている
+                            exchange_metal_id = metal_id
+                            
+                            cursor.execute("""
+                                INSERT INTO M_ActualContract 
+                                (ContractTicker, MetalID, ExchangeCode, IsActive, CreatedDate)
+                                VALUES (?, ?, ?, 1, GETDATE())
+                            """, (security, exchange_metal_id, exchange_code))
+                            cursor.execute("SELECT @@IDENTITY")
+                            actual_contract_id = cursor.fetchone()[0]
+                            conn.commit()
+                            logger.info(f"Created new actual contract: {security} (ID: {actual_contract_id}, Exchange: {exchange_code})")
                             
                 else:
                     # その他の場合はスキップ
