@@ -14,11 +14,11 @@ echo     ^<Description^>Bloomberg data weekly catch-up - 過去1週間の欠損�
 echo   ^</RegistrationInfo^>
 echo   ^<Triggers^>
 echo     ^<CalendarTrigger^>
-echo       ^<StartBoundary^>2025-01-25T07:00:00^</StartBoundary^>
+echo       ^<StartBoundary^>2025-01-27T11:30:00^</StartBoundary^>
 echo       ^<Enabled^>true^</Enabled^>
 echo       ^<ScheduleByWeek^>
 echo         ^<DaysOfWeek^>
-echo           ^<Saturday /^>
+echo           ^<Monday /^>
 echo         ^</DaysOfWeek^>
 echo         ^<WeeksInterval^>1^</WeeksInterval^>
 echo       ^</ScheduleByWeek^>
@@ -69,7 +69,7 @@ if %errorlevel% equ 0 (
     echo Task created successfully!
     echo.
     echo Task name: BloombergDataWeekly
-    echo Schedule: Every Saturday at 7:00 AM
+    echo Schedule: Every Monday at 11:30 AM
     echo.
     echo To test the task now, run:
     echo schtasks /run /tn "BloombergDataWeekly"

@@ -21,7 +21,7 @@ def create_scheduled_tasks():
   </RegistrationInfo>
   <Triggers>
     <CalendarTrigger>
-      <StartBoundary>2025-01-01T06:00:00</StartBoundary>
+      <StartBoundary>2025-01-01T11:00:00</StartBoundary>
       <Enabled>true</Enabled>
       <ScheduleByWeek>
         <DaysOfWeek>
@@ -51,11 +51,11 @@ def create_scheduled_tasks():
   </RegistrationInfo>
   <Triggers>
     <CalendarTrigger>
-      <StartBoundary>2025-01-01T07:00:00</StartBoundary>
+      <StartBoundary>2025-01-01T11:30:00</StartBoundary>
       <Enabled>true</Enabled>
       <ScheduleByWeek>
         <DaysOfWeek>
-          <Saturday />
+          <Monday />
         </DaysOfWeek>
         <WeeksInterval>1</WeeksInterval>
       </ScheduleByWeek>
@@ -106,8 +106,8 @@ def create_scheduled_tasks():
             os.remove('weekly_task.xml')
     
     print("\n登録されたタスク:")
-    print("1. BloombergDataDaily - 平日午前6時に実行")
-    print("2. BloombergDataWeekly - 土曜日午前7時に過去1週間のデータを補完")
+    print("1. BloombergDataDaily - 平日午前11時に実行")
+    print("2. BloombergDataWeekly - 月曜日午前11時30分に過去1週間のデータを補完")
     print("\nタスクの確認: schtasks /query /tn BloombergDataDaily")
     print("タスクの削除: schtasks /delete /tn BloombergDataDaily")
 
