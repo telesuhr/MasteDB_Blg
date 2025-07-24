@@ -21,7 +21,9 @@
       "Bash(rg:*)",
       "Bash(git mv:*)",
       "Bash(move sqlcheck_actual_contract_data.sql sql)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(git rm:*)",
+      "Bash(del cleanup_list.txt)"
     ],
     "deny": []
   }

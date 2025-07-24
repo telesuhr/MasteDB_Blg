@@ -37,7 +37,7 @@ def create_scheduled_tasks():
   </Triggers>
   <Actions>
     <Exec>
-      <Command>{project_dir}\\run_daily.bat</Command>
+      <Command>{project_dir}\\scripts\\daily_operations\\run_daily.bat</Command>
       <WorkingDirectory>{project_dir}</WorkingDirectory>
     </Exec>
   </Actions>
